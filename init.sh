@@ -193,12 +193,12 @@ fi
 
 currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-chmod +x "${currentPath}/ini/parse"
+chmod +x "${currentPath}/../ini/parse"
 
 if [[ ! -L "${HOME}/.local/bin/ini-parse" ]]; then
   echo "Installing ini-parse to local user"
   mkdir -p "${HOME}/.local/bin"
-  ln -s "${currentPath}/ini/parse" "${HOME}/.local/bin/ini-parse"
+  ln -s "${currentPath}/../ini/parse" "${HOME}/.local/bin/ini-parse"
   export PATH="${HOME}/.local/bin:${PATH}"
 else
   echo "ini-parse installed to local user"
@@ -207,18 +207,18 @@ fi
 if [[ "${check}" == 0 ]]; then
   if [[ ! -L /usr/local/bin/ini-parse ]]; then
     echo "Installing ini-parse to system"
-    sudo ln -s "${currentPath}/ini/parse" /usr/local/bin/ini-parse
+    sudo ln -s "${currentPath}/../ini/parse" /usr/local/bin/ini-parse
   else
     echo "ini-parse installed to system"
   fi
 fi
 
-chmod +x "${currentPath}/ini/set"
+chmod +x "${currentPath}/../ini/set"
 
 if [[ ! -L "${HOME}/.local/bin/ini-set" ]]; then
   echo "Installing ini-set to local user"
   mkdir -p "${HOME}/.local/bin"
-  ln -s "${currentPath}/ini/set" "${HOME}/.local/bin/ini-set"
+  ln -s "${currentPath}/../ini/set" "${HOME}/.local/bin/ini-set"
   export PATH="${HOME}/.local/bin:${PATH}"
 else
   echo "ini-set installed to local user"
@@ -227,18 +227,18 @@ fi
 if [[ "${check}" == 0 ]]; then
   if [[ ! -L /usr/local/bin/ini-set ]]; then
     echo "Installing ini-set to system"
-    sudo ln -s "${currentPath}/ini/set" /usr/local/bin/ini-set
+    sudo ln -s "${currentPath}/../ini/set" /usr/local/bin/ini-set
   else
     echo "ini-set installed to system"
   fi
 fi
 
-chmod +x "${currentPath}/ini/del"
+chmod +x "${currentPath}/../ini/del"
 
 if [[ ! -L "${HOME}/.local/bin/ini-del" ]]; then
   echo "Installing ini-del to local user"
   mkdir -p "${HOME}/.local/bin"
-  ln -s "${currentPath}/ini/del" "${HOME}/.local/bin/ini-del"
+  ln -s "${currentPath}/../ini/del" "${HOME}/.local/bin/ini-del"
   export PATH="${HOME}/.local/bin:${PATH}"
 else
   echo "ini-del installed to local user"
@@ -247,18 +247,18 @@ fi
 if [[ "${check}" == 0 ]]; then
   if [[ ! -L /usr/local/bin/ini-del ]]; then
     echo "Installing ini-del to system"
-    sudo ln -s "${currentPath}/ini/del" /usr/local/bin/ini-del
+    sudo ln -s "${currentPath}/../ini/del" /usr/local/bin/ini-del
   else
     echo "ini-del installed to system"
   fi
 fi
 
-chmod +x "${currentPath}/ini/move"
+chmod +x "${currentPath}/../ini/move"
 
 if [[ ! -L "${HOME}/.local/bin/ini-move" ]]; then
   echo "Installing ini-move to local user"
   mkdir -p "${HOME}/.local/bin"
-  ln -s "${currentPath}/ini/move" "${HOME}/.local/bin/ini-move"
+  ln -s "${currentPath}/../ini/move" "${HOME}/.local/bin/ini-move"
   export PATH="${HOME}/.local/bin:${PATH}"
 else
   echo "ini-move installed to local user"
@@ -267,18 +267,18 @@ fi
 if [[ "${check}" == 0 ]]; then
   if [[ ! -L /usr/local/bin/ini-move ]]; then
     echo "Installing ini-move to system"
-    sudo ln -s "${currentPath}/ini/move" /usr/local/bin/ini-move
+    sudo ln -s "${currentPath}/../ini/move" /usr/local/bin/ini-move
   else
     echo "ini-move installed to system"
   fi
 fi
 
-chmod +x "${currentPath}/ini/default"
+chmod +x "${currentPath}/../ini/default"
 
 if [[ ! -L "${HOME}/.local/bin/ini-default" ]]; then
   echo "Installing ini-default to local user"
   mkdir -p "${HOME}/.local/bin"
-  ln -s "${currentPath}/ini/default" "${HOME}/.local/bin/ini-default"
+  ln -s "${currentPath}/../ini/default" "${HOME}/.local/bin/ini-default"
   export PATH="${HOME}/.local/bin:${PATH}"
 else
   echo "ini-default installed to local user"
@@ -287,7 +287,7 @@ fi
 if [[ "${check}" == 0 ]]; then
   if [[ ! -L /usr/local/bin/ini-default ]]; then
     echo "Installing ini-default to system"
-    sudo ln -s "${currentPath}/ini/default" /usr/local/bin/ini-default
+    sudo ln -s "${currentPath}/../ini/default" /usr/local/bin/ini-default
   else
     echo "ini-default installed to system"
   fi
