@@ -29,6 +29,18 @@ while getopts hc? option; do
   esac
 done
 
+currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [[ -f "${currentPath}/.init.${check}.flag" ]]; then
+  echo "Magento Server already initialized"
+  exit 0
+fi
+
+if [[ "${check}" == 1 ]] && [[ -f "${currentPath}/.init.0.flag" ]]; then
+  echo "Magento Server already initialized"
+  exit 0
+fi
+
 if [[ "${check}" == 0 ]]; then
   updateApt=$(which update-apt | wc -l)
 
@@ -191,8 +203,6 @@ else
   echo "tar installed"
 fi
 
-currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 chmod +x "${currentPath}/../ini/parse"
 
 if [[ ! -L "${HOME}/.local/bin/ini-parse" ]]; then
@@ -335,3 +345,5 @@ fi
 EOF
   source "${HOME}/.bash_profile"
 fi
+
+touch "${currentPath}/.init.${check}.flag"
