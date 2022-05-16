@@ -1,11 +1,11 @@
 {
   "name": "tofex/magento-server-core",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "type": "magento-server-component",
   "description": "Tofex Magento Server Core",
   "license": "MIT",
   "require": {
-    "php": ">=7.2.0"
+    "php": ">=7.0"
   },
   "extra": {
     "installer-name": "core"
