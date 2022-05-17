@@ -31,7 +31,7 @@ if [[ -n "${magentoVersion}" ]]; then
   fi
   ini-set "${currentPath}/../../env.properties" yes install repositories "composer|${composerServer}|${composerUser}|${composerPassword}"
   ini-del "${currentPath}/../../env.properties" "project" "composerUser"
-  ini-del "${currentPath}/../../env.properties" "project" "composerUser"
+  ini-del "${currentPath}/../../env.properties" "project" "composerPassword"
   ini-move "${currentPath}/../../env.properties" "yes" "project" "magentoVersion" "install" "magentoVersion"
   ini-move "${currentPath}/../../env.properties" "yes" "project" "magentoEdition" "install" "magentoEdition"
   ini-move "${currentPath}/../../env.properties" "yes" "project" "mageMode" "install" "magentoMode"
