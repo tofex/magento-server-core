@@ -53,6 +53,6 @@ if [[ -n "${solrHost}" ]]; then
   ini-set "${currentPath}/../../env.properties" "yes" "solr" "protocol" "http"
   ini-move "${currentPath}/../../env.properties" "yes" "project" "solrPort" "solr" "port"
   ini-set "${currentPath}/../../env.properties" "yes" "solr" "urlPath" "solr"
-echo
+else
   echo "No solr to move"
 fi

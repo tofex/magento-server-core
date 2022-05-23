@@ -53,6 +53,20 @@ if [[ -n "${redisCacheHost}" ]]; then
   redisCachePassword=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "redisCachePassword")
   if [[ -n "${redisCachePassword}" ]]; then
     ini-move "${currentPath}/../../env.properties" "yes" "project" "redisCachePassword" "redis_cache" "password"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "redisCachePassword"
+  fi
+  redisCacheClassName=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "redisCacheClassName")
+  if [[ -n "${redisCacheClassName}" ]]; then
+    ini-move "${currentPath}/../../env.properties" "yes" "project" "redisCacheClassName" "redis_cache" "className"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "redisCacheClassName"
+  fi
+  redisCachePrefix=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "cachePrefix")
+  if [[ -n "${redisCachePrefix}" ]]; then
+    ini-move "${currentPath}/../../env.properties" "yes" "project" "cachePrefix" "redis_cache" "prefix"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "cachePrefix"
   fi
   ini-move "${currentPath}/../../env.properties" "yes" "project" "redisCacheDatabase" "redis_cache" "database"
 else

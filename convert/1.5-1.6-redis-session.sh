@@ -53,8 +53,10 @@ if [[ -n "${redisSessionHost}" ]]; then
   redisSessionPassword=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "redisSessionPassword")
   if [[ -n "${redisSessionPassword}" ]]; then
     ini-move "${currentPath}/../../env.properties" "yes" "project" "redisSessionPassword" "redis_session" "password"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "redisSessionPassword"
   fi
   ini-move "${currentPath}/../../env.properties" "yes" "project" "redisSessionDatabase" "redis_session" "database"
-echo
+else
   echo "No Redis session to move"
 fi

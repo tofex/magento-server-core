@@ -53,6 +53,22 @@ if [[ -n "${redisFullPageCacheHost}" ]]; then
   redisFullPageCachePassword=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "redisFullPageCachePassword")
   if [[ -n "${redisFullPageCachePassword}" ]]; then
     ini-move "${currentPath}/../../env.properties" "yes" "project" "redisFullPageCachePassword" "redis_fpc" "password"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "redisFullPageCachePassword"
+  fi
+  redisFullPageCacheClassName=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "redisFullPageCacheClassName")
+  if [[ -n "${redisFullPageCacheClassName}" ]]; then
+    ini-move "${currentPath}/../../env.properties" "yes" "project" "redisFullPageCacheClassName" "redis_fpc" "className"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "redisFullPageCacheClassName"
+  fi
+  redisFullPageCachePrefix=$(ini-parse "${currentPath}/../../env.properties" "no" "project" "fpcPrefix")
+  if [[ -n "${redisFullPageCachePrefix}" ]]; then
+    ini-move "${currentPath}/../../env.properties" "yes" "project" "fpcPrefix" "redis_fpc" "prefix"
+  else
+    ini-del "${currentPath}/../../env.properties" "project" "fpcPrefix"
   fi
   ini-move "${currentPath}/../../env.properties" "yes" "project" "redisFullPageCacheDatabase" "redis_fpc" "database"
+else
+  echo "No Redis FPC to move"
 fi
