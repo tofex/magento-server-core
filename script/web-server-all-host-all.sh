@@ -15,16 +15,6 @@ executeScript()
     exit 1
   fi
 
-  local parsedParameters=()
-  for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
-      parameter="${parameterFilePath}"
-    fi
-    parsedParameters+=( "${parameter}" )
-  done
-
   echo "--- Executing script at: ${filePath} on local server: ${serverName} ---"
   "${filePath}" "${parameters[@]}"
 }
@@ -48,26 +38,6 @@ executeScriptWithSSH()
     exit 1
   fi
 
-  local parsedParameters=()
-  local remoteFileNames=()
-  for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
-
-      copyFileToSSH "${sshUser}" "${sshHost}" "${parameterFilePath}"
-
-      local parameterFilePathName
-      parameterFilePathName=$(basename "${parameterFilePath}")
-      local parameterRemoteFileName="/tmp/${parameterFilePathName}"
-
-      parameter="${parameterRemoteFileName}"
-
-      remoteFileNames+=( "${parameterRemoteFileName}" )
-    fi
-    parsedParameters+=( "${parameter}" )
-  done
-
   copyFileToSSH "${sshUser}" "${sshHost}" "${filePath}"
 
   local fileName
@@ -75,13 +45,9 @@ executeScriptWithSSH()
   local remoteFileName="/tmp/${fileName}"
 
   echo "--- Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName} ---"
-  ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
+  ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parameters[@]}"
 
   removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
-
-  for remoteFileName in "${remoteFileNames[@]}"; do
-    removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
-  done
 }
 
 replacePlaceHolder()
@@ -132,7 +98,7 @@ shift
 parameters=("$@")
 
 for parameter in "${parameters[@]}"; do
-  if [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
+  if [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]] || [[ "${parameter}" == "-n" ]] || [[ "${parameter}" == "-o" ]] || [[ "${parameter}" == "-a" ]] || [[ "${parameter}" == "-e" ]] || [[ "${parameter}" == "-c" ]] || [[ "${parameter}" == "-l" ]] || [[ "${parameter}" == "-k" ]] || [[ "${parameter}" == "-r" ]] || [[ "${parameter}" == "-f" ]] || [[ "${parameter}" == "-i" ]] || [[ "${parameter}" == "-b" ]] || [[ "${parameter}" == "-s" ]]; then
     echo "Restricted parameter key used: ${parameter} for script: ${scriptPath}"
     exit 1
   fi
@@ -150,6 +116,12 @@ fi
 serverList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
   echo "No servers specified!"
+  exit 1
+fi
+
+hostList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "system" "host") )
+if [[ "${#hostList[@]}" -eq 0 ]]; then
+  echo "No hosts specified!"
   exit 1
 fi
 
@@ -198,13 +170,71 @@ for server in "${serverList[@]}"; do
       parameters+=( "-y \"${proxyPort}\"" )
     fi
 
-    if [[ "${serverType}" == "local" ]]; then
-      executeScript "${server}" "${scriptPath}" "${parameters[@]}"
-    elif [[ "${serverType}" == "ssh" ]]; then
-      sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "user")
-      sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "host")
-      executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
-    fi
+    for host in "${hostList[@]}"; do
+      vhostList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "${host}" "vhost") )
+      scope=$(ini-parse "${currentPath}/../../env.properties" "yes" "${host}" "scope")
+      code=$(ini-parse "${currentPath}/../../env.properties" "yes" "${host}" "code")
+      sslCertFile=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "sslCertFile")
+      sslKeyFile=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "sslKeyFile")
+      sslTerminated=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "sslTerminated")
+      forceSsl=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "forceSsl")
+      requireIpList=( $(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "requireIp") )
+      basicAuthUserName=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "basicAuthUserName")
+      basicAuthPassword=$(ini-parse "${currentPath}/../../env.properties" "no" "${host}" "basicAuthPassword")
+
+      parameters+=( "-n \"${host}\"" )
+
+      serverName="${vhostList[0]}"
+      parameters+=( "-o \"${serverName}\"" )
+
+      hostAliasList=( "${vhosts[@]:1}" )
+      if [[ "${#hostAliasList[@]}" -gt 0 ]]; then
+        serverAlias=$( IFS=$','; echo "${hostAliasList[*]}" )
+        parameters+=( "-a \"${serverAlias}\"" )
+      fi
+
+      if [[ -n "${scope}" ]]; then
+        parameters+=( "-e \"${scope}\"" )
+      fi
+
+      if [[ -n "${code}" ]]; then
+        parameters+=( "-c \"${code}\"" )
+      fi
+
+      if [[ -n "${sslCertFile}" ]]; then
+        parameters+=( "-l \"${sslCertFile}\"" )
+      fi
+
+      if [[ -n "${sslKeyFile}" ]]; then
+        parameters+=( "-k \"${sslKeyFile}\"" )
+      fi
+
+      if [[ -n "${sslTerminated}" ]]; then
+        parameters+=( "-r \"${sslTerminated}\"" )
+      fi
+
+      if [[ -n "${forceSsl}" ]]; then
+        parameters+=( "-f \"${forceSsl}\"" )
+      fi
+
+      requireIp=$( IFS=$','; echo "${requireIpList[*]}" )
+      parameters+=( "-i \"${requireIp}\"" )
+
+      if [[ -n "${basicAuthUserName}" ]]; then
+        parameters+=( "-b \"${basicAuthUserName}\"" )
+      fi
+      if [[ -n "${basicAuthPassword}" ]]; then
+        parameters+=( "-s \"${basicAuthPassword}\"" )
+      fi
+
+      if [[ "${serverType}" == "local" ]]; then
+        executeScript "${server}" "${scriptPath}" "${parameters[@]}"
+      elif [[ "${serverType}" == "ssh" ]]; then
+        sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "user")
+        sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "host")
+        executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
+      fi
+    done
 
     webServerFound=1
   fi
