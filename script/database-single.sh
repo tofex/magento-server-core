@@ -159,7 +159,7 @@ parameters+=( "-b \"${databaseName}\"" )
 if [[ "${serverType}" == "local" ]]; then
   executeScript "${serverName}" "${scriptPath}" "${parameters[@]}"
 elif [[ "${serverType}" == "ssh" ]]; then
-  sshUser=$(ini-parse "${currentPath}/../env.properties" "yes" "${serverName}" "user")
-  sshHost=$(ini-parse "${currentPath}/../env.properties" "yes" "${serverName}" "host")
+  sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "user")
+  sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "host")
   executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
 fi
