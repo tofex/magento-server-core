@@ -86,7 +86,7 @@ if [[ "${#serverList[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-serverName=
+webServerFound=0
 
 for server in "${serverList[@]}"; do
   webServer=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "webServer")
@@ -99,40 +99,31 @@ for server in "${serverList[@]}"; do
       continue
     fi
 
-    serverName="${server}"
+    webPath=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "webPath")
+    webUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "webUser")
+    webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "webGroup")
 
-    break
+    parameters+=( "-w \"${webPath}\"" )
+    if [[ -n "${webUser}" ]]; then
+      parameters+=( "-u \"${webUser}\"" )
+    fi
+    if [[ -n "${webGroup}" ]]; then
+      parameters+=( "-g \"${webGroup}\"" )
+    fi
+
+    if [[ "${serverType}" == "local" ]]; then
+      executeScript "${server}" "${scriptPath}" "${parameters[@]}"
+    elif [[ "${serverType}" == "ssh" ]]; then
+      sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "user")
+      sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "host")
+      executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
+    fi
+
+    webServerFound=1
   fi
 done
 
-if [[ -z "${serverName}" ]]; then
+if [[ "${webServerFound}" == 0 ]]; then
   echo "No web server settings found"
   exit 1
-fi
-
-serverType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "type")
-
-if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
-  echo "Invalid web server server type: ${serverType} of server: ${serverName}"
-  exit 1
-fi
-
-webPath=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "webPath")
-webUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${serverName}" "webUser")
-webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${serverName}" "webGroup")
-
-parameters+=( "-w \"${webPath}\"" )
-if [[ -n "${webUser}" ]]; then
-  parameters+=( "-u \"${webUser}\"" )
-fi
-if [[ -n "${webGroup}" ]]; then
-  parameters+=( "-g \"${webGroup}\"" )
-fi
-
-if [[ "${serverType}" == "local" ]]; then
-  executeScript "${serverName}" "${scriptPath}" "${parameters[@]}"
-elif [[ "${serverType}" == "ssh" ]]; then
-  sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "user")
-  sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "host")
-  executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
 fi

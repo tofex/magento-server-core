@@ -2,16 +2,20 @@
 
 executeScript()
 {
+  local serverName="${1}"
+  shift
   local filePath="${1}"
   shift
   local parameters=("$@")
 
-  echo "Executing script at: ${filePath}"
+  echo "--- Executing script at: ${filePath} on local server: ${serverName} ---"
   "${filePath}" "${parameters[@]}"
 }
 
 executeScriptWithSSH()
 {
+  local serverName="${1}"
+  shift
   local sshUser="${1}"
   shift
   local sshHost="${1}"
@@ -26,7 +30,7 @@ executeScriptWithSSH()
   fileName=$(basename "${filePath}")
   local remoteFileName="/tmp/${fileName}"
 
-  echo "Executing script at: ${sshUser}@${sshHost}:${remoteFileName}"
+  echo "--- Executing script at: ${sshUser}@${sshHost}:${remoteFileName} on remote server: ${serverName} ---"
   ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parameters[@]}"
 
   removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
@@ -153,13 +157,9 @@ parameters+=( "-s \"${databasePassword}\"" )
 parameters+=( "-b \"${databaseName}\"" )
 
 if [[ "${serverType}" == "local" ]]; then
-  executeScript "${scriptPath}" "${parameters[@]}"
+  executeScript "${serverName}" "${scriptPath}" "${parameters[@]}"
 elif [[ "${serverType}" == "ssh" ]]; then
   sshUser=$(ini-parse "${currentPath}/../env.properties" "yes" "${serverName}" "user")
   sshHost=$(ini-parse "${currentPath}/../env.properties" "yes" "${serverName}" "host")
-
-  executeScriptWithSSH "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
-else
-  echo "Invalid database server type: ${serverType}"
-  exit 1
+  executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
 fi
