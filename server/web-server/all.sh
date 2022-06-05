@@ -38,24 +38,28 @@ currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd "${currentPath}"
 
-if [[ ! -f "${currentPath}/../../env.properties" ]]; then
+if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
   echo "No environment specified!"
   exit 1
 fi
 
-serverList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "${system}" "server") )
+serverList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "${system}" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
   echo "No servers specified!"
   exit 1
 fi
 
-for server in "${serverList[@]}"; do
-  database=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "database")
+webServerFound=0
 
-  if [[ -n "${database}" ]]; then
-    echo "${database}"
-    exit 0
+for server in "${serverList[@]}"; do
+  webServer=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webServer")
+
+  if [[ -n "${webServer}" ]]; then
+    echo "${webServer}"
+    webServerFound=1
   fi
 done
 
-exit 1
+if [[ "${webServerFound}" == 0 ]]; then
+  exit 1
+fi
