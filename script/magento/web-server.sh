@@ -20,25 +20,25 @@ if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
   exit 1
 fi
 
-magentoVersion=$(ini-parse "${currentPath}/../env.properties" "yes" "install" "magentoVersion")
+magentoVersion=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoVersion")
 if [[ -z "${magentoVersion}" ]]; then
   echo "No magento version specified!"
   exit 1
 fi
 
-magentoEdition=$(ini-parse "${currentPath}/../env.properties" "yes" "install" "magentoEdition")
+magentoEdition=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoEdition")
 if [[ -z "${magentoEdition}" ]]; then
   echo "No magento edition specified!"
   exit 1
 fi
 
-magentoMode=$(ini-parse "${currentPath}/../env.properties" "yes" "install" "magentoMode")
+magentoMode=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoMode")
 if [[ -z "${magentoMode}" ]]; then
   echo "No magento mode specified!"
   exit 1
 fi
 
-repositoryList=( $(ini-parse "${currentPath}/../env.properties" "yes" "install" "repositories") )
+repositoryList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "repositories") )
 if [[ "${#repositoryList[@]}" -eq 0 ]]; then
   echo "No composer repositories specified!"
   exit 1
