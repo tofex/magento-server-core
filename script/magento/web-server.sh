@@ -9,7 +9,7 @@ shift
 parameters=("$@")
 
 for parameter in "${parameters[@]}"; do
-  if [[ "${parameter}" == "-m" ]] || [[ "${parameter}" == "-e" ]] || [[ "${parameter}" == "-d" ]] || [[ "${parameter}" == "-r" ]] || [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
+  if [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
     echo "Restricted parameter key used: ${parameter} for script: ${scriptPath}"
     exit 1
   fi
@@ -57,7 +57,7 @@ if [[ "${#serverList[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-webServerFound=0
+serverName=
 
 for server in "${serverList[@]}"; do
   webServer=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webServer")
@@ -70,51 +70,60 @@ for server in "${serverList[@]}"; do
       continue
     fi
 
-    webPath=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "webPath")
-    webUser=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webUser")
-    webGroup=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webGroup")
-    webServerType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${webServer}" "type")
-    webServerVersion=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${webServer}" "version")
-    httpPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "httpPort")
-    sslPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "sslPort")
-    proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
-    proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
+    serverName="${server}"
 
-    parameters+=( "-w \"${webPath}\"" )
-    if [[ -n "${webUser}" ]]; then
-      parameters+=( "-u \"${webUser}\"" )
-    fi
-    if [[ -n "${webGroup}" ]]; then
-      parameters+=( "-g \"${webGroup}\"" )
-    fi
-    parameters+=( "-t \"${webServerType}\"" )
-    parameters+=( "-v \"${webServerVersion}\"" )
-    if [[ -n "${httpPort}" ]]; then
-      parameters+=( "-p \"${httpPort}\"" )
-    fi
-    if [[ -n "${sslPort}" ]]; then
-      parameters+=( "-z \"${sslPort}\"" )
-    fi
-    if [[ -n "${proxyHost}" ]]; then
-      parameters+=( "-x \"${proxyHost}\"" )
-    fi
-    if [[ -n "${proxyPort}" ]]; then
-      parameters+=( "-y \"${proxyPort}\"" )
-    fi
-
-    if [[ "${serverType}" == "local" ]]; then
-      executeScript "${server}" "${scriptPath}" "${parameters[@]}"
-    elif [[ "${serverType}" == "ssh" ]]; then
-      sshUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "user")
-      sshHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "host")
-      executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
-    fi
-
-    webServerFound=1
+    break
   fi
 done
 
-if [[ "${webServerFound}" == 0 ]]; then
+if [[ -z "${serverName}" ]]; then
   echo "No web server settings found"
   exit 1
+fi
+
+serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "type")
+
+if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
+  echo "Invalid web server server type: ${serverType} of server: ${serverName}"
+  exit 1
+fi
+
+webPath=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "webPath")
+webUser=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "webUser")
+webGroup=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "webGroup")
+webServerType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${webServer}" "type")
+webServerVersion=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${webServer}" "version")
+httpPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "httpPort")
+sslPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "sslPort")
+proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
+proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
+
+parameters+=( "-w \"${webPath}\"" )
+if [[ -n "${webUser}" ]]; then
+  parameters+=( "-u \"${webUser}\"" )
+fi
+if [[ -n "${webGroup}" ]]; then
+  parameters+=( "-g \"${webGroup}\"" )
+fi
+parameters+=( "-t \"${webServerType}\"" )
+parameters+=( "-v \"${webServerVersion}\"" )
+if [[ -n "${httpPort}" ]]; then
+  parameters+=( "-p \"${httpPort}\"" )
+fi
+if [[ -n "${sslPort}" ]]; then
+  parameters+=( "-z \"${sslPort}\"" )
+fi
+if [[ -n "${proxyHost}" ]]; then
+  parameters+=( "-x \"${proxyHost}\"" )
+fi
+if [[ -n "${proxyPort}" ]]; then
+  parameters+=( "-y \"${proxyPort}\"" )
+fi
+
+if [[ "${serverType}" == "local" ]]; then
+  executeScript "${serverName}" "${scriptPath}" "${parameters[@]}"
+elif [[ "${serverType}" == "ssh" ]]; then
+  sshUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "user")
+  sshHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
+  executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
 fi

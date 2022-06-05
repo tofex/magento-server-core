@@ -44,49 +44,51 @@ for host in "${hostList[@]}"; do
   basicAuthUserName=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "basicAuthUserName")
   basicAuthPassword=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "basicAuthPassword")
 
-  parameters+=( "-n \"${host}\"" )
+  hostParameters=("${parameters[@]}")
+
+  hostParameters+=( "-n \"${host}\"" )
 
   serverName="${vhostList[0]}"
-  parameters+=( "-o \"${serverName}\"" )
+  hostParameters+=( "-o \"${serverName}\"" )
 
   hostAliasList=( "${vhosts[@]:1}" )
   if [[ "${#hostAliasList[@]}" -gt 0 ]]; then
     serverAlias=$( IFS=$','; echo "${hostAliasList[*]}" )
-    parameters+=( "-a \"${serverAlias}\"" )
+    hostParameters+=( "-a \"${serverAlias}\"" )
   fi
 
   if [[ -n "${scope}" ]]; then
-    parameters+=( "-e \"${scope}\"" )
+    hostParameters+=( "-e \"${scope}\"" )
   fi
 
   if [[ -n "${code}" ]]; then
-    parameters+=( "-c \"${code}\"" )
+    hostParameters+=( "-c \"${code}\"" )
   fi
 
   if [[ -n "${sslCertFile}" ]]; then
-    parameters+=( "-l \"${sslCertFile}\"" )
+    hostParameters+=( "-l \"${sslCertFile}\"" )
   fi
 
   if [[ -n "${sslKeyFile}" ]]; then
-    parameters+=( "-k \"${sslKeyFile}\"" )
+    hostParameters+=( "-k \"${sslKeyFile}\"" )
   fi
 
   if [[ -n "${sslTerminated}" ]]; then
-    parameters+=( "-r \"${sslTerminated}\"" )
+    hostParameters+=( "-r \"${sslTerminated}\"" )
   fi
 
   if [[ -n "${forceSsl}" ]]; then
-    parameters+=( "-f \"${forceSsl}\"" )
+    hostParameters+=( "-f \"${forceSsl}\"" )
   fi
 
   requireIp=$( IFS=$','; echo "${requireIpList[*]}" )
-  parameters+=( "-i \"${requireIp}\"" )
+  hostParameters+=( "-i \"${requireIp}\"" )
 
   if [[ -n "${basicAuthUserName}" ]]; then
-    parameters+=( "-b \"${basicAuthUserName}\"" )
+    hostParameters+=( "-b \"${basicAuthUserName}\"" )
   fi
   if [[ -n "${basicAuthPassword}" ]]; then
-    parameters+=( "-s \"${basicAuthPassword}\"" )
+    hostParameters+=( "-s \"${basicAuthPassword}\"" )
   fi
 
   webServerFound=0
@@ -112,34 +114,36 @@ for host in "${hostList[@]}"; do
       proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
       proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
 
-      parameters+=( "-w \"${webPath}\"" )
+      hostServerParameters=("${hostParameters[@]}")
+
+      hostServerParameters+=( "-w \"${webPath}\"" )
       if [[ -n "${webUser}" ]]; then
-        parameters+=( "-u \"${webUser}\"" )
+        hostServerParameters+=( "-u \"${webUser}\"" )
       fi
       if [[ -n "${webGroup}" ]]; then
-        parameters+=( "-g \"${webGroup}\"" )
+        hostServerParameters+=( "-g \"${webGroup}\"" )
       fi
-      parameters+=( "-t \"${webServerType}\"" )
-      parameters+=( "-v \"${webServerVersion}\"" )
+      hostServerParameters+=( "-t \"${webServerType}\"" )
+      hostServerParameters+=( "-v \"${webServerVersion}\"" )
       if [[ -n "${httpPort}" ]]; then
-        parameters+=( "-p \"${httpPort}\"" )
+        hostServerParameters+=( "-p \"${httpPort}\"" )
       fi
       if [[ -n "${sslPort}" ]]; then
-        parameters+=( "-z \"${sslPort}\"" )
+        hostServerParameters+=( "-z \"${sslPort}\"" )
       fi
       if [[ -n "${proxyHost}" ]]; then
-        parameters+=( "-x \"${proxyHost}\"" )
+        hostServerParameters+=( "-x \"${proxyHost}\"" )
       fi
       if [[ -n "${proxyPort}" ]]; then
-        parameters+=( "-y \"${proxyPort}\"" )
+        hostServerParameters+=( "-y \"${proxyPort}\"" )
       fi
 
       if [[ "${serverType}" == "local" ]]; then
-        executeScript "${server}" "${scriptPath}" "${parameters[@]}"
+        executeScript "${server}" "${scriptPath}" "${hostServerParameters[@]}"
       elif [[ "${serverType}" == "ssh" ]]; then
         sshUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "user")
         sshHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "host")
-        executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
+        executeScriptWithSSH "${server}" "${sshUser}" "${sshHost}" "${scriptPath}" "${hostServerParameters[@]}"
       fi
 
       webServerFound=1

@@ -49,31 +49,33 @@ for server in "${serverList[@]}"; do
     proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
     proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
 
-    parameters+=( "-n \"${server}\"" )
-    parameters+=( "-e \"${currentPath}/../../../env.properties\"" )
-    parameters+=( "-w \"${webPath}\"" )
+    serverParameters=("${parameters[@]}")
+
+    serverParameters+=( "-n \"${server}\"" )
+    serverParameters+=( "-e \"${currentPath}/../../../env.properties\"" )
+    serverParameters+=( "-w \"${webPath}\"" )
     if [[ -n "${webUser}" ]]; then
-      parameters+=( "-u \"${webUser}\"" )
+      serverParameters+=( "-u \"${webUser}\"" )
     fi
     if [[ -n "${webGroup}" ]]; then
-      parameters+=( "-g \"${webGroup}\"" )
+      serverParameters+=( "-g \"${webGroup}\"" )
     fi
-    parameters+=( "-t \"${webServerType}\"" )
-    parameters+=( "-v \"${webServerVersion}\"" )
+    serverParameters+=( "-t \"${webServerType}\"" )
+    serverParameters+=( "-v \"${webServerVersion}\"" )
     if [[ -n "${httpPort}" ]]; then
-      parameters+=( "-p \"${httpPort}\"" )
+      serverParameters+=( "-p \"${httpPort}\"" )
     fi
     if [[ -n "${sslPort}" ]]; then
-      parameters+=( "-z \"${sslPort}\"" )
+      serverParameters+=( "-z \"${sslPort}\"" )
     fi
     if [[ -n "${proxyHost}" ]]; then
-      parameters+=( "-x \"${proxyHost}\"" )
+      serverParameters+=( "-x \"${proxyHost}\"" )
     fi
     if [[ -n "${proxyPort}" ]]; then
-      parameters+=( "-y \"${proxyPort}\"" )
+      serverParameters+=( "-y \"${proxyPort}\"" )
     fi
 
-    executeScript "${server}" "${scriptPath}" "${parameters[@]}"
+    executeScript "${server}" "${scriptPath}" "${serverParameters[@]}"
 
     webServerFound=1
   fi
