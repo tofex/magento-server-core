@@ -29,13 +29,13 @@ fi
 serverName=
 
 for server in "${serverList[@]}"; do
-  database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "database")
+  varnish=$(ini-parse "${currentPath}/../env.properties" "no" "${server}" "varnish")
 
-  if [[ -n "${database}" ]]; then
+  if [[ -n "${varnish}" ]]; then
     serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "type")
 
     if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
-      echo "Invalid database server type: ${serverType} of server: ${server}"
+      echo "Invalid Varnsih server type: ${serverType} of server: ${server}"
       continue
     fi
 
@@ -46,18 +46,18 @@ for server in "${serverList[@]}"; do
 done
 
 if [[ -z "${serverName}" ]]; then
-  echo "No database settings found"
+  echo "No Varnish settings found"
   exit 1
 fi
 
 serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "type")
 
 if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
-  echo "Invalid database server type: ${serverType} of server: ${serverName}"
+  echo "Invalid Varnish server type: ${serverType} of server: ${serverName}"
   exit 1
 fi
 
-database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "database")
+varnish=$(ini-parse "${currentPath}/../env.properties" "no" "${serverName}" "varnish")
 
 if [[ "${serverType}" == "local" ]]; then
   host="localhost"
@@ -65,54 +65,40 @@ elif [[ "${serverType}" == "ssh" ]]; then
   host=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
 fi
 
-port=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "port")
-user=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "user")
-password=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "password")
-name=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "name")
-type=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "type")
-version=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "version")
+port=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${varnish}" "port")
+adminPort=$(ini-parse "${currentPath}/../env.properties" "no" "${varnish}" "adminPort")
+secretFile="/etc/varnish/secret"
+version=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${varnish}" "version")
 
 if [[ -z "${host}" ]]; then
-  echo "No database host specified!"
+  echo "No Varnish host specified!"
   exit 1
 fi
 
 if [[ -z "${port}" ]]; then
-  echo "No database port specified!"
+  echo "No Varnish port specified!"
   exit 1
 fi
 
-if [[ -z "${user}" ]]; then
-  echo "No database user specified!"
+if [[ -z "${adminPort}" ]]; then
+  echo "No Varnish admin port specified!"
   exit 1
 fi
 
-if [[ -z "${password}" ]]; then
-  echo "No database password specified!"
-  exit 1
-fi
-
-if [[ -z "${name}" ]]; then
-  echo "No database name specified!"
-  exit 1
-fi
-
-if [[ -z "${type}" ]]; then
-  echo "No database type specified!"
+if [[ -z "${secretFile}" ]]; then
+  echo "No Varnish secret file specified!"
   exit 1
 fi
 
 if [[ -z "${version}" ]]; then
-  echo "No database version specified!"
+  echo "No Varnish version specified!"
   exit 1
 fi
 
 parameters+=( "-o \"${host}\"" )
 parameters+=( "-p \"${port}\"" )
-parameters+=( "-u \"${user}\"" )
-parameters+=( "-s \"${password}\"" )
-parameters+=( "-b \"${name}\"" )
-parameters+=( "-t \"${type}\"" )
+parameters+=( "-a \"${adminPort}\"" )
+parameters+=( "-s \"${secretFile}\"" )
 parameters+=( "-v \"${version}\"" )
 
 if [[ "${serverType}" == "local" ]]; then

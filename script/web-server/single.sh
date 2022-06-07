@@ -67,6 +67,7 @@ sslPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}"
 proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
 proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
 
+parameters+=( "-n \"${server}\"" )
 parameters+=( "-w \"${webPath}\"" )
 if [[ -n "${webUser}" ]]; then
   parameters+=( "-u \"${webUser}\"" )

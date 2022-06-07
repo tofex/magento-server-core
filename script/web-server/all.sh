@@ -9,7 +9,7 @@ shift
 parameters=("$@")
 
 for parameter in "${parameters[@]}"; do
-  if [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
+  if [[ "${parameter}" == "-n" ]] || [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
     echo "Restricted parameter key used: ${parameter} for script: ${scriptPath}"
     exit 1
   fi
@@ -51,6 +51,7 @@ for server in "${serverList[@]}"; do
 
     serverParameters=("${parameters[@]}")
 
+    serverParameters+=( "-n \"${server}\"" )
     serverParameters+=( "-w \"${webPath}\"" )
     if [[ -n "${webUser}" ]]; then
       serverParameters+=( "-u \"${webUser}\"" )

@@ -20,6 +20,12 @@ executeScript()
     if [[ "${parameter}" =~ ^script:.* ]]; then
       local parameterFilePath="${parameter:7}"
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+
+      if [[ ! -f "${parameterFilePath}" ]]; then
+        echo "Script at: ${parameterFilePath} does not exist"
+        exit 1
+      fi
+
       parameter="${parameterFilePath}"
     fi
     parsedParameters+=( "${parameter}" )
@@ -54,6 +60,11 @@ executeScriptWithSSH()
     if [[ "${parameter}" =~ ^script:.* ]]; then
       local parameterFilePath="${parameter:7}"
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+
+      if [[ ! -f "${parameterFilePath}" ]]; then
+        echo "Script at: ${parameterFilePath} does not exist"
+        exit 1
+      fi
 
       copyFileToSSH "${sshUser}" "${sshHost}" "${parameterFilePath}"
 
@@ -102,6 +113,11 @@ copyFileToSSH()
   local sshUser="${1}"
   local sshHost="${2}"
   local filePath="${3}"
+
+  if [[ ! -f "${filePath}" ]]; then
+    echo "File at: ${filePath} does not exist"
+    exit 1
+  fi
 
   local fileName
   fileName=$(basename "${filePath}")
