@@ -36,8 +36,6 @@ fi
 
 currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd "${currentPath}"
-
 if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
   echo "No environment specified!"
   exit 1
@@ -61,5 +59,6 @@ for server in "${serverList[@]}"; do
 done
 
 if [[ "${databaseFound}" == 0 ]]; then
+  echo "No servers specified!"
   exit 1
 fi

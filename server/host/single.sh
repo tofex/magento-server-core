@@ -41,24 +41,17 @@ if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
   exit 1
 fi
 
-serverList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "${system}" "server") )
-if [[ "${#serverList[@]}" -eq 0 ]]; then
-  echo "No servers specified!"
+hostList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "${system}" "host") )
+if [[ "${#hostList[@]}" -eq 0 ]]; then
+  echo "No hosts specified!"
   exit 1
 fi
 
-webServerFound=0
-
-for server in "${serverList[@]}"; do
-  webServer=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webServer")
-
-  if [[ -n "${webServer}" ]]; then
-    echo "${webServer}"
-    webServerFound=1
-  fi
+for host in "${hostList[@]}"; do
+  vhostList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "${host}" "vhost") )
+  serverName="${vhostList[0]}"
+  echo -n "${serverName}"
+  exit 0
 done
 
-if [[ "${webServerFound}" == 0 ]]; then
-  echo "No servers specified!"
-  exit 1
-fi
+exit 1

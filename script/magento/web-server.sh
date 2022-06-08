@@ -46,10 +46,15 @@ fi
 
 repositories=$(IFS=,; printf '%s' "${repositoryList[*]}")
 
+cryptKey=$(ini-parse "${currentPath}/../../../env.properties" "no" "install" "cryptKey")
+
 parameters+=( "-m \"${magentoVersion}\"" )
 parameters+=( "-e \"${magentoEdition}\"" )
 parameters+=( "-d \"${magentoMode}\"" )
 parameters+=( "-r \"${repositories}\"" )
+if [[ -n "${cryptKey}" ]]; then
+  parameters+=( "-c \"${cryptKey}\"" )
+fi
 
 serverList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
@@ -98,6 +103,7 @@ sslPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}"
 proxyHost=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyHost")
 proxyPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${webServer}" "proxyPort")
 
+parameters+=( "-n \"${serverName}\"" )
 parameters+=( "-w \"${webPath}\"" )
 if [[ -n "${webUser}" ]]; then
   parameters+=( "-u \"${webUser}\"" )

@@ -36,8 +36,6 @@ fi
 
 currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-cd "${currentPath}"
-
 if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
   echo "No environment specified!"
   exit 1
@@ -53,7 +51,7 @@ for server in "${serverList[@]}"; do
   webServer=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "webServer")
 
   if [[ -n "${webServer}" ]]; then
-    echo "${webServer}"
+    echo -n "${webServer}"
     exit 0
   fi
 done

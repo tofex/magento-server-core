@@ -2,7 +2,7 @@
 
 currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "${currentPath}/../base.sh"
+source "${currentPath}/../../base.sh"
 
 scriptPath="${1}"
 shift
@@ -15,30 +15,30 @@ for parameter in "${parameters[@]}"; do
   fi
 done
 
-if [[ ! -f "${currentPath}/../../../env.properties" ]]; then
+if [[ ! -f "${currentPath}/../../../../env.properties" ]]; then
   echo "No environment specified!"
   exit 1
 fi
 
-magentoVersion=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoVersion")
+magentoVersion=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "install" "magentoVersion")
 if [[ -z "${magentoVersion}" ]]; then
   echo "No magento version specified!"
   exit 1
 fi
 
-magentoEdition=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoEdition")
+magentoEdition=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "install" "magentoEdition")
 if [[ -z "${magentoEdition}" ]]; then
   echo "No magento edition specified!"
   exit 1
 fi
 
-magentoMode=$(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "magentoMode")
+magentoMode=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "install" "magentoMode")
 if [[ -z "${magentoMode}" ]]; then
   echo "No magento mode specified!"
   exit 1
 fi
 
-repositoryList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "install" "repositories") )
+repositoryList=( $(ini-parse "${currentPath}/../../../../env.properties" "yes" "install" "repositories") )
 if [[ "${#repositoryList[@]}" -eq 0 ]]; then
   echo "No composer repositories specified!"
   exit 1
@@ -46,7 +46,7 @@ fi
 
 repositories=$(IFS=,; printf '%s' "${repositoryList[*]}")
 
-cryptKey=$(ini-parse "${currentPath}/../../../env.properties" "no" "install" "cryptKey")
+cryptKey=$(ini-parse "${currentPath}/../../../../env.properties" "no" "install" "cryptKey")
 
 parameters+=( "-m \"${magentoVersion}\"" )
 parameters+=( "-e \"${magentoEdition}\"" )
@@ -56,7 +56,7 @@ if [[ -n "${cryptKey}" ]]; then
   parameters+=( "-c \"${cryptKey}\"" )
 fi
 
-serverList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "system" "server") )
+serverList=( $(ini-parse "${currentPath}/../../../../env.properties" "yes" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
   echo "No servers specified!"
   exit 1
@@ -65,10 +65,10 @@ fi
 serverName=
 
 for server in "${serverList[@]}"; do
-  database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "database")
+  database=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${server}" "database")
 
   if [[ -n "${database}" ]]; then
-    serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "type")
+    serverType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${server}" "type")
 
     if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
       echo "Invalid database server type: ${serverType} of server: ${server}"
@@ -86,27 +86,27 @@ if [[ -z "${serverName}" ]]; then
   exit 1
 fi
 
-serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "type")
+serverType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "type")
 
 if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
   echo "Invalid database server type: ${serverType} of server: ${serverName}"
   exit 1
 fi
 
-database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "database")
+database=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${serverName}" "database")
 
 if [[ "${serverType}" == "local" ]]; then
   databaseHost="localhost"
 elif [[ "${serverType}" == "ssh" ]]; then
-  databaseHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
+  databaseHost=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "host")
 fi
 
-databasePort=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "port")
-databaseUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "user")
-databasePassword=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "password")
-databaseName=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "name")
-databaseType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "type")
-databaseVersion=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${database}" "version")
+databasePort=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "port")
+databaseUser=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "user")
+databasePassword=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "password")
+databaseName=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "name")
+databaseType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "type")
+databaseVersion=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${database}" "version")
 
 if [[ -z "${databaseHost}" ]]; then
   echo "No database host specified!"
@@ -152,9 +152,9 @@ parameters+=( "-t \"${databaseType}\"" )
 parameters+=( "-v \"${databaseVersion}\"" )
 
 if [[ "${serverType}" == "local" ]]; then
-  executeScript "${serverName}" "${scriptPath}" "${parameters[@]}"
+  executeScriptQuiet "${serverName}" "${scriptPath}" "${parameters[@]}"
 elif [[ "${serverType}" == "ssh" ]]; then
-  sshUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "user")
-  sshHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
-  executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
+  sshUser=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "user")
+  sshHost=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "host")
+  executeScriptWithSSHQuiet "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${parameters[@]}"
 fi

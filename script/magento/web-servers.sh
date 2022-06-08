@@ -46,10 +46,15 @@ fi
 
 repositories=$(IFS=,; printf '%s' "${repositoryList[*]}")
 
+cryptKey=$(ini-parse "${currentPath}/../../../env.properties" "no" "install" "cryptKey")
+
 parameters+=( "-m \"${magentoVersion}\"" )
 parameters+=( "-e \"${magentoEdition}\"" )
 parameters+=( "-d \"${magentoMode}\"" )
 parameters+=( "-r \"${repositories}\"" )
+if [[ -n "${cryptKey}" ]]; then
+  parameters+=( "-c \"${cryptKey}\"" )
+fi
 
 serverList=( $(ini-parse "${currentPath}/../../../env.properties" "yes" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
@@ -82,6 +87,7 @@ for server in "${serverList[@]}"; do
 
     serverParameters=("${parameters[@]}")
 
+    serverParameters+=( "-n \"${server}\"" )
     serverParameters+=( "-w \"${webPath}\"" )
     if [[ -n "${webUser}" ]]; then
       serverParameters+=( "-u \"${webUser}\"" )

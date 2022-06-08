@@ -2,7 +2,7 @@
 
 currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "${currentPath}/../base.sh"
+source "${currentPath}/../../base.sh"
 
 scriptPath="${1}"
 shift
@@ -50,8 +50,7 @@ for server in "${serverList[@]}"; do
 done
 
 if [[ -z "${serverName}" ]]; then
-  echo "No Redis cache settings found"
-  exit 1
+  exit 0
 fi
 
 serverType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "type")
