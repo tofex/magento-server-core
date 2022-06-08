@@ -17,8 +17,16 @@ executeScript()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+      local parameterFilePath
+      if [[ "${parameter}" =~ ^script:.* ]]; then
+        parameterFilePath="${parameter:7}"
+      else
+        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        parsedParameters+=( "${parameterParts[0]}" )
+        parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
+        parameterFilePath="${parameterFilePath:7}"
+      fi
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
@@ -56,8 +64,16 @@ executeScriptQuiet()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+      local parameterFilePath
+      if [[ "${parameter}" =~ ^script:.* ]]; then
+        parameterFilePath="${parameter:7}"
+      else
+        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        parsedParameters+=( "${parameterParts[0]}" )
+        parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
+        parameterFilePath="${parameterFilePath:7}"
+      fi
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
@@ -99,8 +115,16 @@ executeScriptWithSSH()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+      local parameterFilePath
+      if [[ "${parameter}" =~ ^script:.* ]]; then
+        parameterFilePath="${parameter:7}"
+      else
+        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        parsedParameters+=( "${parameterParts[0]}" )
+        parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
+        parameterFilePath="${parameterFilePath:7}"
+      fi
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
 
       local parameterRemoteFileName
@@ -165,8 +189,16 @@ executeScriptWithSSHQuiet()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]]; then
-      local parameterFilePath="${parameter:7}"
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+      local parameterFilePath
+      if [[ "${parameter}" =~ ^script:.* ]]; then
+        parameterFilePath="${parameter:7}"
+      else
+        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        parsedParameters+=( "${parameterParts[0]}" )
+        parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
+        parameterFilePath="${parameterFilePath:7}"
+      fi
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
 
       local parameterRemoteFileName
