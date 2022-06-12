@@ -94,7 +94,7 @@ for host in "${hostList[@]}"; do
   serverName=
 
   for server in "${serverList[@]}"; do
-    varnish=$(ini-parse "${currentPath}/../env.properties" "no" "${server}" "varnish")
+    varnish=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "varnish")
 
     if [[ -n "${varnish}" ]]; then
       serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "type")
@@ -122,7 +122,7 @@ for host in "${hostList[@]}"; do
     exit 1
   fi
 
-  varnish=$(ini-parse "${currentPath}/../env.properties" "no" "${serverName}" "varnish")
+  varnish=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "varnish")
 
   if [[ "${serverType}" == "local" ]]; then
     host="localhost"
@@ -131,7 +131,7 @@ for host in "${hostList[@]}"; do
   fi
 
   port=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${varnish}" "port")
-  adminPort=$(ini-parse "${currentPath}/../env.properties" "no" "${varnish}" "adminPort")
+  adminPort=$(ini-parse "${currentPath}/../../../env.properties" "no" "${varnish}" "adminPort")
   secretFile="/etc/varnish/secret"
   version=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${varnish}" "version")
 
