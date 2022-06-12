@@ -47,18 +47,13 @@ if [[ "${#serverList[@]}" -eq 0 ]]; then
   exit 1
 fi
 
-databaseFound=0
-
 for server in "${serverList[@]}"; do
-  database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "database")
+  varnish=$(ini-parse "${currentPath}/../../../env.properties" "no" "${server}" "varnish")
 
-  if [[ -n "${database}" ]]; then
-    echo "${database}"
-    databaseFound=1
+  if [[ -n "${varnish}" ]]; then
+    echo "${varnish}"
+    exit 0
   fi
 done
 
-if [[ "${databaseFound}" == 0 ]]; then
-  echo "No database servers specified!"
-  exit 1
-fi
+exit 1
