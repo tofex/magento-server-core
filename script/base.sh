@@ -45,7 +45,7 @@ executeScript()
   done
 
   echo "--- Executing script at: ${filePath} on local server: ${serverName} ---"
-  "${filePath}" "${parameters[@]}"
+  "${filePath}" "${parsedParameters[@]}"
 }
 
 executeScriptQuiet()
@@ -90,7 +90,7 @@ executeScriptQuiet()
     parsedParameters+=( "${parameter}" )
   done
 
-  "${filePath}" "${parameters[@]}"
+  "${filePath}" "${parsedParameters[@]}"
 }
 
 executeScriptWithSSH()
