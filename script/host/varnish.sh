@@ -51,7 +51,7 @@ for host in "${hostList[@]}"; do
   serverName="${vhostList[0]}"
   hostParameters+=( "-o \"${serverName}\"" )
 
-  hostAliasList=( "${vhosts[@]:1}" )
+  hostAliasList=( "${vhostList[@]:1}" )
   if [[ "${#hostAliasList[@]}" -gt 0 ]]; then
     serverAlias=$( IFS=$','; echo "${hostAliasList[*]}" )
     hostParameters+=( "-a \"${serverAlias}\"" )
