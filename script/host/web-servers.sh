@@ -9,7 +9,7 @@ shift
 parameters=("$@")
 
 for parameter in "${parameters[@]}"; do
-  if [[ "${parameter}" == "-n" ]] || [[ "${parameter}" == "-o" ]] || [[ "${parameter}" == "-a" ]] || [[ "${parameter}" == "-e" ]] || [[ "${parameter}" == "-c" ]] || [[ "${parameter}" == "-l" ]] || [[ "${parameter}" == "-k" ]] || [[ "${parameter}" == "-r" ]] || [[ "${parameter}" == "-f" ]] || [[ "${parameter}" == "-i" ]] || [[ "${parameter}" == "-b" ]] || [[ "${parameter}" == "-s" ]] || [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
+  if [[ "${parameter}" == "-n" ]] || [[ "${parameter}" == "-o" ]] || [[ "${parameter}" == "-a" ]] || [[ "${parameter}" == "-e" ]] || [[ "${parameter}" == "-c" ]] || [[ "${parameter}" == "-l" ]] || [[ "${parameter}" == "-k" ]] || [[ "${parameter}" == "-r" ]] || [[ "${parameter}" == "-f" ]] || [[ "${parameter}" == "-i" ]] || [[ "${parameter}" == "-j" ]] || [[ "${parameter}" == "-b" ]] || [[ "${parameter}" == "-s" ]] || [[ "${parameter}" == "-w" ]] || [[ "${parameter}" == "-u" ]] || [[ "${parameter}" == "-g" ]] || [[ "${parameter}" == "-t" ]] || [[ "${parameter}" == "-v" ]] || [[ "${parameter}" == "-p" ]] || [[ "${parameter}" == "-z" ]] || [[ "${parameter}" == "-x" ]] || [[ "${parameter}" == "-y" ]]; then
     echo "Restricted parameter key used: ${parameter} for script: ${scriptPath}"
     exit 1
   fi
@@ -41,6 +41,7 @@ for host in "${hostList[@]}"; do
   sslTerminated=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "sslTerminated")
   forceSsl=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "forceSsl")
   requireIpList=( $(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "requireIp") )
+  allowUrlList=( $(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "allowUrl") )
   basicAuthUserName=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "basicAuthUserName")
   basicAuthPassword=$(ini-parse "${currentPath}/../../../env.properties" "no" "${host}" "basicAuthPassword")
 
@@ -83,6 +84,9 @@ for host in "${hostList[@]}"; do
 
   requireIp=$( IFS=$','; echo "${requireIpList[*]}" )
   hostParameters+=( "-i \"${requireIp}\"" )
+
+  allowUrl=$( IFS=$','; echo "${allowUrlList[*]}" )
+  hostParameters+=( "-j \"${allowUrl}\"" )
 
   if [[ -n "${basicAuthUserName}" ]]; then
     hostParameters+=( "-b \"${basicAuthUserName}\"" )
