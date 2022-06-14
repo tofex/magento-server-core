@@ -42,5 +42,5 @@ if [[ -n "${elasticsearchHost}" ]] || [[ -n "${elasticsearchVersion}" ]]; then
   ini-move "${currentPath}/../../env.properties" "yes" "project" "elasticsearchVersion" "elasticsearch" "version"
   ini-move "${currentPath}/../../env.properties" "yes" "project" "elasticsearchPort" "elasticsearch" "port"
 else
-  echo "No elasticsearch to move"
+  echo "No Elasticsearch to move"
 fi
