@@ -34,12 +34,14 @@ if [[ -n "${databaseHost}" ]]; then
     if [[ "${type}" == "local" ]]; then
       if [[ "${databaseHost}" == "localhost" ]] || [[ "${databaseHost}" == "127.0.0.1" ]]; then
         ini-set "${currentPath}/../../env.properties" "yes" "${server}" "database" "database"
+        ini-move "${currentPath}/../../env.properties" "yes" "project" "upgrade" "${server}" "upgrade"
         serverFound=1
       fi
     elif [[ "${type}" == "ssh" ]]; then
       sshHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${server}" "sshHost")
       if [[ "${sshHost}" == "${databaseHost}" ]]; then
         ini-set "${currentPath}/../../env.properties" "yes" "${server}" "database" "database"
+        ini-move "${currentPath}/../../env.properties" "yes" "project" "upgrade" "${server}" "upgrade"
         serverFound=1
       fi
     fi
