@@ -253,6 +253,17 @@ replacePlaceHolder()
   echo -n "${text}"
 }
 
+prepareSSH()
+{
+  local sshHost="${1}"
+  if [[ $(echo 'exit' | telnet "${sshHost}" 22 2>&1 | grep -c "Connected to" | cat) -gt 0 ]]; then
+    ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
+  else
+    echo "Could not access SSH host: ${sshHost}"
+    exit 1
+  fi
+}
+
 copyFileToSSH()
 {
   local sshUser="${1}"
@@ -272,7 +283,7 @@ copyFileToSSH()
     remoteFileName="/tmp/${fileName}"
   fi
 
-  ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
+  prepareSSH "${sshHost}"
 
   echo "Copying file from: ${filePath} to: ${sshUser}@${sshHost}:${remoteFileName}"
   scp -p -q "${filePath}" "${sshUser}@${sshHost}:${remoteFileName}"
@@ -296,7 +307,7 @@ copyFileToSSHQuiet()
     remoteFileName="/tmp/${fileName}"
   fi
 
-  ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
+  prepareSSH "${sshHost}"
 
   scp -p -q "${filePath}" "${sshUser}@${sshHost}:${remoteFileName}"
 }
@@ -307,7 +318,7 @@ removeFileFromSSH()
   local sshHost="${2}"
   local filePath="${3}"
 
-  ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
+  prepareSSH "${sshHost}"
 
   echo "Removing file from: ${sshUser}@${sshHost}:${filePath}"
   ssh "${sshUser}@${sshHost}" "rm -rf ${filePath}"
@@ -319,7 +330,7 @@ removeFileFromSSHQuiet()
   local sshHost="${2}"
   local filePath="${3}"
 
-  ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
+  prepareSSH "${sshHost}"
 
   ssh "${sshUser}@${sshHost}" "rm -rf ${filePath}"
 }
