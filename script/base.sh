@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 executeScript()
 {
   local serverName="${1}"
@@ -17,7 +19,7 @@ executeScript()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
       if [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
@@ -64,7 +66,7 @@ executeScriptQuiet()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
       if [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
@@ -115,7 +117,7 @@ executeScriptWithSSH()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
       if [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
@@ -152,16 +154,19 @@ executeScriptWithSSH()
     parsedParameters+=( "${parameter}" )
   done
 
-  copyFileToSSH "${sshUser}" "${sshHost}" "${filePath}"
-
   local fileName
   fileName=$(basename "${filePath}")
   local remoteFileName="/tmp/${fileName}"
 
+  copyFileToSSH "${sshUser}" "${sshHost}" "${currentPath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
+  copyFileToSSH "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
+
   echo "--- Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName} ---"
+  # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
 
   removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
+  removeFileFromSSH "${sshUser}" "${sshHost}" "/tmp/prepare-parameters.sh"
 
   for remoteFileName in "${remoteFileNames[@]}"; do
     removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
@@ -189,7 +194,7 @@ executeScriptWithSSHQuiet()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
       if [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
@@ -225,12 +230,14 @@ executeScriptWithSSHQuiet()
     parsedParameters+=( "${parameter}" )
   done
 
-  copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${filePath}"
-
   local fileName
   fileName=$(basename "${filePath}")
   local remoteFileName="/tmp/${fileName}"
 
+  copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${currentPath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
+  copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
+
+  # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
 
   removeFileFromSSHQuiet "${sshUser}" "${sshHost}" "${remoteFileName}"
@@ -321,6 +328,7 @@ removeFileFromSSH()
   prepareSSH "${sshHost}"
 
   echo "Removing file from: ${sshUser}@${sshHost}:${filePath}"
+  # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "rm -rf ${filePath}"
 }
 
@@ -332,5 +340,6 @@ removeFileFromSSHQuiet()
 
   prepareSSH "${sshHost}"
 
+  # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "rm -rf ${filePath}"
 }
