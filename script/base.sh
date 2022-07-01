@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+currentBasePath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 executeScript()
 {
@@ -158,7 +158,7 @@ executeScriptWithSSH()
   fileName=$(basename "${filePath}")
   local remoteFileName="/tmp/${fileName}"
 
-  copyFileToSSH "${sshUser}" "${sshHost}" "${currentPath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
+  copyFileToSSH "${sshUser}" "${sshHost}" "${currentBasePath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
   copyFileToSSH "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
 
   echo "--- Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName} ---"
@@ -234,7 +234,7 @@ executeScriptWithSSHQuiet()
   fileName=$(basename "${filePath}")
   local remoteFileName="/tmp/${fileName}"
 
-  copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${currentPath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
+  copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${currentBasePath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
   copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
 
   # shellcheck disable=SC2029
