@@ -161,11 +161,11 @@ for host in "${hostList[@]}"; do
   vhostList=( $(ini-parse "${currentPath}/../../../../env.properties" "yes" "${host}" "vhost") )
   scope=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${host}" "scope")
   code=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${host}" "code")
-  serverName="${vhostList[0]}"
+  hostServerName="${vhostList[0]}"
 
   hostParameters=("${parameters[@]}")
 
-  hostParameters+=( "-x \"${serverName}\"" )
+  hostParameters+=( "-x \"${hostServerName}\"" )
 
   if [[ -n "${scope}" ]]; then
     hostParameters+=( "-y \"${scope}\"" )

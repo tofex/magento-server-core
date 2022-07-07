@@ -442,6 +442,8 @@ if [[ "${executeServerSystem}" == "host" ]]; then
       exit 0
     fi
   done
+
+  exit 0
 fi
 
 serverList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "system" "server") )
