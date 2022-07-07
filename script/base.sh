@@ -10,7 +10,7 @@ executeScript()
   shift
   local parameters=("$@")
 
-  filePath=$(replacePlaceHolder "${filePath}")
+  filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
     echo "Script at: ${filePath} does not exist"
@@ -31,7 +31,7 @@ executeScript()
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
       fi
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
         readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
@@ -60,7 +60,7 @@ executeScriptQuiet()
   shift
   local parameters=("$@")
 
-  filePath=$(replacePlaceHolder "${filePath}")
+  filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
     exit 1
@@ -80,7 +80,7 @@ executeScriptQuiet()
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
       fi
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
         readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
@@ -111,7 +111,7 @@ executeScriptWithSSH()
   shift
   local parameters=("$@")
 
-  filePath=$(replacePlaceHolder "${filePath}")
+  filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
     echo "Script at: ${filePath} does not exist"
@@ -133,7 +133,7 @@ executeScriptWithSSH()
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
       fi
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       local parameterRemoteFileName
       if [[ "${parameterFilePath}" =~ ":" ]]; then
@@ -191,7 +191,7 @@ executeScriptWithSSHQuiet()
   shift
   local parameters=("$@")
 
-  filePath=$(replacePlaceHolder "${filePath}")
+  filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
     exit 1
@@ -212,7 +212,7 @@ executeScriptWithSSHQuiet()
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
       fi
-      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}")
+      parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       local parameterRemoteFileName
       if [[ "${parameterFilePath}" =~ ":" ]]; then
@@ -258,9 +258,50 @@ executeScriptWithSSHQuiet()
 replacePlaceHolder()
 {
   local text="${1}"
+  shift
 
+  local preparedParameters
+  local parameter
+  local key
+  local value
   local textReplace
-  textReplace=$(echo "${text}" | sed 's/\[\([[:alpha:]]*\)\]/\${\1}/g')
+
+  declare -A preparedParameters
+  while [[ "$#" -gt 0 ]]; do
+    parameter="${1}"
+    shift
+    if [[ "${parameter:0:2}" == "--" ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]* ]] || [[ "${parameter}" =~ ^-\?$ ]]; then
+      if [[ "${parameter}" =~ ^--[[:alpha:]]*[[:space:]] ]]; then
+        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        key="${parameterParts[0]:2}"
+        value=$(echo "${parameterParts[1]}" | tr -d '"')
+        preparedParameters["${key}"]="${value}"
+        continue
+      fi
+      if [[ "${parameter:0:2}" == "--" ]]; then
+        key="${parameter:2}"
+      elif [[ "${parameter}" =~ ^-\?$ ]]; then
+        key="help"
+      else
+        key="${parameter:1}"
+      fi
+      if [[ "$#" -eq 0 ]]; then
+        preparedParameters["${key}"]=1
+      else
+        value="${1}"
+        if [[ "${value:0:2}" == "--" ]]; then
+          preparedParameters["${key}"]=1
+          continue
+        fi
+        shift
+        # shellcheck disable=SC2034
+        preparedParameters["${key}"]="${value}"
+      fi
+    fi
+  done
+
+  # shellcheck disable=SC2016
+  textReplace=$(echo "${text}" | sed 's/\[\([[:alpha:]]*\)\]/\${preparedParameters\["\1\"]}/g')
   if [[ "${text}" != "${textReplace}" ]]; then
     text=$(eval echo "${textReplace}")
   fi

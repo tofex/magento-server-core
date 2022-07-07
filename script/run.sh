@@ -426,20 +426,22 @@ if [[ "${executeServerSystem}" == "host" ]]; then
   fi
 
   for hostName in "${hostList[@]}"; do
-    runParameters=("${parameters[@]}")
+    if [[ "${executeServerName}" == "${hostName}" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeServerName}" == "single" ]]; then
+      runParameters=("${parameters[@]}")
 
-    addHostParameters "${hostName}"
+      addHostParameters "${hostName}"
 
-    if [[ "${#executeServerList[@]}" -gt 1 ]]; then
-      subExecuteServerList=( "${executeServerList[@]:1}" )
-      subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
-      "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${runParameters[@]}"
-    else
-      "${currentPath}/run.sh" "all:all" "${scriptPath}" "${runParameters[@]}"
-    fi
+      if [[ "${#executeServerList[@]}" -gt 1 ]]; then
+        subExecuteServerList=( "${executeServerList[@]:1}" )
+        subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
+        "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${runParameters[@]}"
+      else
+        "${currentPath}/run.sh" "all:all" "${scriptPath}" "${runParameters[@]}"
+      fi
 
-    if [[ "${executeServerName}" == "single" ]]; then
-      exit 0
+      if [[ "${executeServerName}" == "single" ]]; then
+        exit 0
+      fi
     fi
   done
 
