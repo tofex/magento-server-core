@@ -19,9 +19,11 @@ executeScript()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^file:.* ]] || [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
-      if [[ "${parameter}" =~ ^script:.* ]]; then
+      if [[ "${parameter}" =~ ^file:.* ]]; then
+        parameterFilePath="${parameter:5}"
+      elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
         readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
@@ -37,7 +39,7 @@ executeScript()
       fi
 
       if [[ ! -f "${parameterFilePath}" ]]; then
-        echo "Script at: ${parameterFilePath} does not exist"
+        echo "File at: ${parameterFilePath} does not exist"
         exit 1
       fi
 
@@ -66,9 +68,11 @@ executeScriptQuiet()
 
   local parsedParameters=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^file:.* ]] || [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
-      if [[ "${parameter}" =~ ^script:.* ]]; then
+      if [[ "${parameter}" =~ ^file:.* ]]; then
+        parameterFilePath="${parameter:5}"
+      elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
         readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
@@ -117,9 +121,11 @@ executeScriptWithSSH()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^file:.* ]] || [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
-      if [[ "${parameter}" =~ ^script:.* ]]; then
+      if [[ "${parameter}" =~ ^file:.* ]]; then
+        parameterFilePath="${parameter:5}"
+      elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
         readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
@@ -141,7 +147,7 @@ executeScriptWithSSH()
       fi
 
       if [[ ! -f "${parameterFilePath}" ]]; then
-        echo "Script at: ${parameterFilePath} does not exist"
+        echo "File at: ${parameterFilePath} does not exist"
         exit 1
       fi
 
@@ -194,9 +200,11 @@ executeScriptWithSSHQuiet()
   local parsedParameters=()
   local remoteFileNames=()
   for parameter in "${parameters[@]}"; do
-    if [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
+    if [[ "${parameter}" =~ ^file:.* ]] || [[ "${parameter}" =~ ^script:.* ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]*\"script: ]] || [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]*\"script: ]]; then
       local parameterFilePath
-      if [[ "${parameter}" =~ ^script:.* ]]; then
+      if [[ "${parameter}" =~ ^file:.* ]]; then
+        parameterFilePath="${parameter:5}"
+      elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
         readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
