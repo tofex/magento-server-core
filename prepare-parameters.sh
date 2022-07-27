@@ -5,8 +5,8 @@ unparsedParameters=( )
 while [[ "$#" -gt 0 ]]; do
   parameter="${1}"
   shift
-  if [[ "${parameter:0:2}" == "--" ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]* ]] || [[ "${parameter}" =~ ^-\?$ ]]; then
-    if [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]* ]]; then
+  if [[ "${parameter:0:2}" == "--" ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]+ ]] || [[ "${parameter}" =~ ^-\?$ ]]; then
+    if [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]+ ]]; then
       parameter="${parameter:2}"
       key=$(echo "${parameter}" | grep -oP '[[:alpha:]]+(?=\s)' | tr -d "\n")
       value=$(echo "${parameter:${#key}}" | xargs)
