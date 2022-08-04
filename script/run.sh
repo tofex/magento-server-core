@@ -484,11 +484,15 @@ else
   executeOnAll=0
 fi
 
+foundAnyServer=0
+
 for serverName in "${serverList[@]}"; do
   serverSystem=$(ini-parse "${currentPath}/../../env.properties" "no" "${serverName}" "${executeServerSystem}")
 
   if [[ -n "${serverSystem}" ]] || [[ "${executeOnAll}" == 1 ]]; then
     if [[ "${executeServerName}" == "${serverName}" ]] || [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeOnAll}" == 1 ]]; then
+      foundAnyServer=1
+
       runParameters=("${parameters[@]}")
 
       if [[ "${executeServerSystem}" == "install" ]]; then
@@ -531,3 +535,18 @@ for serverName in "${serverList[@]}"; do
     fi
   fi
 done
+
+if [[ "${foundAnyServer}" == 0 ]]; then
+  if [[ "${executeServerName}" == "skip" ]]; then
+    if [[ "${#executeServerList[@]}" -eq 1 ]]; then
+      "${currentPath}/run.sh" "all:all" "${scriptPath}" "${parameters[@]}"
+    else
+      subExecuteServerList=( "${executeServerList[@]:1}" )
+      subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
+      "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${parameters[@]}"
+    fi
+  else
+    >&2 echo "Could not find any server to run: ${executeServerSystem}:${executeServerName}"
+    exit 1
+  fi
+fi
