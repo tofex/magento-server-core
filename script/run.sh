@@ -466,6 +466,7 @@ elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "
       addConfigParameters
     fi
     executeScript "local" "${scriptPath}" "${runParameters[@]}"
+    exit 0
   else
     executeOnAll=1
   fi
