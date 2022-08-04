@@ -455,8 +455,20 @@ if [[ "${#serverList[@]}" -eq 0 ]]; then
 fi
 
 # shellcheck disable=SC2235
-if [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "all" ]] || [[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]]); then
+if [[ "${#executeServerList[@]}" -eq 1 ]] && [[ "${executeServerSystem}" == "all" ]]; then
   executeOnAll=1
+elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]]); then
+  if [[ "${executeServerName}" == "local" ]]; then
+    runParameters=("${parameters[@]}")
+    if [[ "${executeServerSystem}" == "install" ]]; then
+      addInstallParameters
+    elif [[ "${executeServerSystem}" == "config" ]]; then
+      addConfigParameters
+    fi
+    executeScript "local" "${scriptPath}" "${runParameters[@]}"
+  else
+    executeOnAll=1
+  fi
 elif [[ "${#executeServerList[@]}" -gt 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]]); then
   runParameters=("${parameters[@]}")
   if [[ "${executeServerSystem}" == "install" ]]; then
