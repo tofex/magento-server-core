@@ -491,7 +491,7 @@ for serverName in "${serverList[@]}"; do
   serverSystem=$(ini-parse "${currentPath}/../../env.properties" "no" "${serverName}" "${executeServerSystem}")
 
   if [[ -n "${serverSystem}" ]] || [[ "${executeOnAll}" == 1 ]]; then
-    if [[ "${executeServerName}" == "${serverName}" ]] || [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeOnAll}" == 1 ]]; then
+    if [[ "${executeServerName}" == "${serverName}" ]] || [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeOnAll}" == 1 ]]; then
       foundAnyServer=1
 
       runParameters=("${parameters[@]}")
@@ -530,7 +530,7 @@ for serverName in "${serverList[@]}"; do
         "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${runParameters[@]}"
       fi
 
-      if [[ "${executeServerName}" == "single" ]]; then
+      if [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]]; then
         break
       fi
     fi
