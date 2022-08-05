@@ -27,12 +27,12 @@ while [[ "$#" -gt 0 ]]; do
       eval "${key}=1"
     else
       value="${1}"
-      shift
       if [[ "${value:0:2}" == "--" ]]; then
         parameters["${key}"]=1
         eval "${key}=1"
         continue
       fi
+      shift
       # shellcheck disable=SC2034
       parameters["${key}"]="${value}"
       eval "${key}=\"${value}\""
