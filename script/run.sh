@@ -491,7 +491,7 @@ for serverName in "${serverList[@]}"; do
   serverSystem=$(ini-parse "${currentPath}/../../env.properties" "no" "${serverName}" "${executeServerSystem}")
 
   if [[ -n "${serverSystem}" ]] || [[ "${executeOnAll}" == 1 ]]; then
-    if [[ "${executeServerName}" == "${serverName}" ]] || [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeOnAll}" == 1 ]]; then
+    if [[ "${executeServerName}" == "${serverName}" ]] || [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]] || [[ "${executeServerName}" == "ignore" ]] || [[ "${executeServerName}" == "all" ]] || [[ "${executeOnAll}" == 1 ]]; then
       foundAnyServer=1
 
       runParameters=("${parameters[@]}")
@@ -530,7 +530,7 @@ for serverName in "${serverList[@]}"; do
         "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${runParameters[@]}"
       fi
 
-      if [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]]; then
+      if [[ "${executeServerName}" == "single" ]] || [[ "${executeServerName}" == "skip" ]] || [[ "${executeServerName}" == "ignore" ]]; then
         break
       fi
     fi
@@ -541,6 +541,14 @@ if [[ "${foundAnyServer}" == 0 ]]; then
   if [[ "${executeServerName}" == "skip" ]]; then
     if [[ "${#executeServerList[@]}" -eq 1 ]]; then
       "${currentPath}/run.sh" "all:all" "${scriptPath}" "${parameters[@]}"
+    else
+      subExecuteServerList=( "${executeServerList[@]:1}" )
+      subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
+      "${currentPath}/run.sh" "${subExecuteServers}" "${scriptPath}" "${parameters[@]}"
+    fi
+  elif [[ "${executeServerName}" == "ignore" ]]; then
+    if [[ "${#executeServerList[@]}" -eq 1 ]]; then
+      exit 0
     else
       subExecuteServerList=( "${executeServerList[@]:1}" )
       subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
