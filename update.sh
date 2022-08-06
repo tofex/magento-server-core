@@ -30,4 +30,4 @@ currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd "${currentPath}/.."
 
-wget --no-cache -nv -O - https://bitbucket.org/tofex/magento-server-create/raw/master/update.sh | bash
+wget --no-cache -q -O - https://bitbucket.org/tofex/magento-server-create/raw/master/update.sh | bash
