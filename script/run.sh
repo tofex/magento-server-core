@@ -449,9 +449,9 @@ if [[ "${executeServerSystem}" == "host" ]]; then
   exit 0
 fi
 
-serverList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "system" "server") )
+serverList=( $(ini-parse "${currentPath}/../../env.properties" "no" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
-  echo "No servers specified!"
+  >&2 echo "Could not find any server to run: ${executeServerSystem}:${executeServerName}"
   exit 1
 fi
 
