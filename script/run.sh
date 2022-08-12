@@ -84,6 +84,7 @@ addWebServerParameters()
   webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webGroup")
 
   runParameters+=( "--webServerServerName \"${webServerServerName}\"" )
+  runParameters+=( "--webServerId \"${webServer}\"" )
   runParameters+=( "--webServerType \"${webServerType}\"" )
   runParameters+=( "--webServerVersion \"${webServerVersion}\"" )
   runParameters+=( "--webServerHost \"${webServerHost}\"" )
