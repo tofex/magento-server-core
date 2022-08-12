@@ -451,8 +451,12 @@ fi
 
 serverList=( $(ini-parse "${currentPath}/../../env.properties" "no" "system" "server") )
 if [[ "${#serverList[@]}" -eq 0 ]]; then
-  >&2 echo "Could not find any server to run: ${executeServerSystem}:${executeServerName}"
-  exit 1
+  if [[ "${executeServerName}" == "skip" ]] || [[ "${executeServerName}" == "ignore" ]]; then
+    exit 0
+  else
+    >&2 echo "Could not find any server to run: ${executeServerSystem}:${executeServerName}"
+    exit 1
+  fi
 fi
 
 # shellcheck disable=SC2235
