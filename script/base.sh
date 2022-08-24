@@ -309,14 +309,53 @@ replacePlaceHolder()
   echo -n "${text}"
 }
 
+declare -A preparedSSHAccess
+export preparedSSHAccess
+
 prepareSSH()
 {
   local sshHost="${1}"
-  if [[ $(echo 'exit' | telnet "${sshHost}" 22 2>&1 | grep -c "Connected to" | cat) -gt 0 ]]; then
-    ssh-keyscan "${sshHost}" >> ~/.ssh/known_hosts 2>/dev/null
-  else
-    echo "Could not access SSH host: ${sshHost}"
-    exit 1
+
+  if ! test "${preparedSSHAccess["${sshHost}"]+isset}"; then
+    if [[ $(echo 'exit' | telnet "${sshHost}" 22 2>&1 | grep -c "Connected to" | cat) -gt 0 ]]; then
+      echo "Preparing SSH access to host: ${sshHost}"
+      keyCount=$(cat ~/.ssh/known_hosts | awk '{print $1, $2}' | grep -e "^${sshHost}\s" | awk '{print $2}' | sort | uniq -c | sort -nr | awk '{print $1}' | head -n 1)
+      if [[ -z "${keyCount}" ]]; then
+        echo "No previous keys found"
+        keyCount=0
+      fi
+      if [[ "${keyCount}" -gt 0 ]]; then
+        if [[ "${keyCount}" -eq 1 ]]; then
+          changedKey=0
+          oldIFS="${IFS}"
+          IFS=$'\n'
+          keys=( $(ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" ) )
+          IFS="${oldIFS}"
+          for key in "${keys[@]}"; do
+            if [[ $(cat ~/.ssh/known_hosts | grep -c "${key}" | cat) -eq 0 ]]; then
+              echo "Found changed keys to host"
+              changedKey=1
+              break
+            fi
+          done
+        else
+          changedKey=1
+        fi
+        if [[ "${changedKey}" == 1 ]]; then
+          echo "Removing all previous host keys"
+          ssh-keygen -R "${sshHost}" >/dev/null 2>/dev/null
+          echo "Adding all host keys"
+          ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
+        fi
+      else
+        echo "Adding all host keys"
+        ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
+      fi
+      preparedSSHAccess["${sshHost}"]=1
+    else
+      echo "Could not access SSH host: ${sshHost}"
+      exit 1
+    fi
   fi
 }
 
