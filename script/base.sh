@@ -315,15 +315,34 @@ export preparedSSHAccess
 prepareSSH()
 {
   local sshHost="${1}"
+  local verbose="${2:-1}"
+  local keyCount
+  local changedKey
+  local oldIFS
+  local keys
+  local key
+  local currentHostKey
+  local previousHostKeys
+  local foundHostKey
+  local sshHostIp
+  local currentHostIpKey
+  local previousHostIpKeys
+  local foundHostIpKey
 
   if ! test "${preparedSSHAccess["${sshHost}"]+isset}"; then
     if [[ $(echo 'exit' | telnet "${sshHost}" 22 2>&1 | grep -c "Connected to" | cat) -gt 0 ]]; then
-      echo "Preparing SSH access to host: ${sshHost}"
+      if [[ "${verbose}" == 1 ]]; then
+        echo "Preparing SSH access to host: ${sshHost}"
+      fi
+
       keyCount=$(cat ~/.ssh/known_hosts | awk '{print $1, $2}' | grep -e "^${sshHost}\s" | awk '{print $2}' | sort | uniq -c | sort -nr | awk '{print $1}' | head -n 1)
       if [[ -z "${keyCount}" ]]; then
-        echo "No previous keys found"
+        if [[ "${verbose}" == 1 ]]; then
+          echo "No previous keys found"
+        fi
         keyCount=0
       fi
+
       if [[ "${keyCount}" -gt 0 ]]; then
         if [[ "${keyCount}" -eq 1 ]]; then
           changedKey=0
@@ -333,7 +352,9 @@ prepareSSH()
           IFS="${oldIFS}"
           for key in "${keys[@]}"; do
             if [[ $(cat ~/.ssh/known_hosts | grep -c "${key}" | cat) -eq 0 ]]; then
-              echo "Found changed keys to host"
+              if [[ "${verbose}" == 1 ]]; then
+                echo "Found changed keys to host"
+              fi
               changedKey=1
               break
             fi
@@ -342,20 +363,72 @@ prepareSSH()
           changedKey=1
         fi
         if [[ "${changedKey}" == 1 ]]; then
-          echo "Removing all previous host keys"
+          if [[ "${verbose}" == 1 ]]; then
+            echo "Removing all previous host keys"
+          fi
           ssh-keygen -R "${sshHost}" >/dev/null 2>/dev/null
-          echo "Adding all host keys"
+          if [[ "${verbose}" == 1 ]]; then
+            echo "Adding all host keys"
+          fi
           ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
         fi
       else
-        echo "Adding all host keys"
+        if [[ "${verbose}" == 1 ]]; then
+          echo "Adding all host keys"
+        fi
         ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
       fi
+
+      # shellcheck disable=SC2046
+      currentHostKey=$(ssh-keygen -lf /dev/stdin <<<$(ssh-keyscan -t rsa "${sshHost}" 2>/dev/null | grep -ve "^#") | awk '{print $2}')
+      previousHostKeys=( $(ssh-keygen -l -f ~/.ssh/known_hosts -F "${sshHost}" | grep -ve "^#" | awk '{print $3}') )
+      foundHostKey=$(echo "${previousHostKeys[@]}" | grep -c "${currentHostKey}" | cat)
+      if [[ "${foundHostKey}" == 0 ]]; then
+        if [[ "${#previousHostKeys[@]}" -gt 0 ]]; then
+          if [[ "${verbose}" == 1 ]]; then
+            echo "Removing all previous host keys"
+          fi
+          ssh-keygen -R "${sshHost}" >/dev/null 2>/dev/null
+          if [[ "${verbose}" == 1 ]]; then
+            echo "Adding all host keys"
+          fi
+          ssh-keyscan "${sshHost}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
+        fi
+      fi
+
       preparedSSHAccess["${sshHost}"]=1
     else
-      echo "Could not access SSH host: ${sshHost}"
+      >&2 echo "Could not access SSH host: ${sshHost}"
       exit 1
     fi
+  fi
+
+  sshHostIp=$(getent hosts "${sshHost}" | awk '{print $1}')
+
+  if ! test "${preparedSSHAccess["${sshHostIp}"]+isset}"; then
+    if [[ "${verbose}" == 1 ]]; then
+      echo "Preparing SSH access to IP: ${sshHostIp}"
+    fi
+
+    # shellcheck disable=SC2046
+    currentHostIpKey=$(ssh-keygen -lf /dev/stdin <<<$(ssh-keyscan -t rsa "${sshHostIp}" 2>/dev/null | grep -ve "^#") | awk '{print $2}')
+    previousHostIpKeys=( $(ssh-keygen -l -f ~/.ssh/known_hosts -F "${sshHostIp}" | grep -ve "^#" | awk '{print $3}') )
+    foundHostIpKey=$(echo "${previousHostIpKeys[@]}" | grep -c "${currentHostIpKey}" | cat)
+
+    if [[ "${foundHostIpKey}" == 0 ]]; then
+      if [[ "${#previousHostIpKeys[@]}" -gt 0 ]]; then
+        if [[ "${verbose}" == 1 ]]; then
+          echo "Removing all previous host keys"
+        fi
+        ssh-keygen -R "${sshHostIp}" >/dev/null 2>/dev/null
+        if [[ "${verbose}" == 1 ]]; then
+          echo "Adding all host keys"
+        fi
+        ssh-keyscan "${sshHostIp}" 2>/dev/null | grep -ve "^#" >> ~/.ssh/known_hosts
+      fi
+    fi
+
+    preparedSSHAccess["${sshHostIp}"]=1
   fi
 }
 
@@ -402,7 +475,7 @@ copyFileToSSHQuiet()
     remoteFileName="/tmp/${fileName}"
   fi
 
-  prepareSSH "${sshHost}"
+  prepareSSH "${sshHost}" 0
 
   scp -p -q "${filePath}" "${sshUser}@${sshHost}:${remoteFileName}"
 }
@@ -426,7 +499,7 @@ removeFileFromSSHQuiet()
   local sshHost="${2}"
   local filePath="${3}"
 
-  prepareSSH "${sshHost}"
+  prepareSSH "${sshHost}" 0
 
   # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "rm -rf ${filePath}"
