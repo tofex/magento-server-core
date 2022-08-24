@@ -12,5 +12,5 @@ elif [[ -f /tmp/prepare-parameters.sh ]]; then
 fi
 
 if [[ "${webServerType}" == "apache" ]]; then
-  "${currentPath}/../../env/update-web-server.sh" -i "${webServerId}" -t "apache_php"
+  "${currentPath}/../../../env/update-web-server.sh" -i "${webServerId}" -t "apache_php"
 fi
