@@ -540,6 +540,7 @@ addInstallParameters()
   repositories=$(IFS=,; printf '%s' "${repositoryList[*]}")
 
   cryptKey=$(ini-parse "${currentBasePath}/../../env.properties" "no" "install" "cryptKey")
+  adminPath=$(ini-parse "${currentBasePath}/../../env.properties" "no" "install" "adminPath")
 
   runParameters+=( "--magentoVersion \"${magentoVersion}\"" )
   runParameters+=( "--magentoEdition \"${magentoEdition}\"" )
@@ -547,6 +548,9 @@ addInstallParameters()
   runParameters+=( "--repositories \"${repositories}\"" )
   if [[ -n "${cryptKey}" ]]; then
     runParameters+=( "--cryptKey \"${cryptKey}\"" )
+  fi
+  if [[ -n "${adminPath}" ]]; then
+    runParameters+=( "--adminPath \"${adminPath}\"" )
   fi
 }
 
