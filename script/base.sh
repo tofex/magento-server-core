@@ -797,6 +797,7 @@ addElasticsearchParameters()
   local elasticsearchVersion
   local elasticsearchHost
   local elasticsearchPort
+  local elasticsearchPrefix
   local elasticsearchUser
   local elasticsearchPassword
 
@@ -812,13 +813,19 @@ addElasticsearchParameters()
     exit 1
   fi
   elasticsearchPort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearch}" "port")
+  elasticsearchPrefix=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "prefix")
   elasticsearchUser=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "user")
   elasticsearchPassword=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "password")
+
+  if [[ -z "${elasticsearchPrefix}" ]]; then
+    elasticsearchPrefix="magento"
+  fi
 
   runParameters+=( "--elasticsearchServerName \"${elasticsearchServerName}\"" )
   runParameters+=( "--elasticsearchVersion \"${elasticsearchVersion}\"" )
   runParameters+=( "--elasticsearchHost \"${elasticsearchHost}\"" )
   runParameters+=( "--elasticsearchPort \"${elasticsearchPort}\"" )
+  runParameters+=( "--elasticsearchPrefix \"${elasticsearchPrefix}\"" )
   if [[ -n "${elasticsearchUser}" ]]; then
     runParameters+=( "--elasticsearchUser \"${elasticsearchUser}\"" )
   fi
