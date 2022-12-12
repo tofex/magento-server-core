@@ -425,7 +425,7 @@ if [[ -f /etc/bash/profile ]]; then
     echo "Adding path to file at: /etc/bash/profile"
     cat <<EOF | tee -a /etc/bash/profile > /dev/null
 if [ -d "${binaryDirectory}" ] ; then
-  PATH="${binaryDirectory}:\${PATH}"
+  export PATH="${binaryDirectory}:\${PATH}"
 fi
 EOF
     source /etc/bash/profile
