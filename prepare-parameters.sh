@@ -1,6 +1,11 @@
 #!/bin/bash -e
 
-declare -Ag parameters
+if [[ $(declare -g >/dev/null 2>&1 && echo "true" || echo "false") == "true" ]]; then
+  declare -Ag parameters
+else
+  declare -A parameters
+fi
+
 unparsedParameters=( )
 while [[ "$#" -gt 0 ]]; do
   parameter="${1}"
