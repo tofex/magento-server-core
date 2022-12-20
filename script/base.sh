@@ -633,7 +633,7 @@ addDatabaseParameters()
   databaseServerType=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${databaseServerName}" "type")
 
   if [[ "${databaseServerType}" == "local" ]]; then
-    databaseHost="localhost"
+    databaseHost="127.0.0.1"
   elif [[ "${databaseServerType}" == "ssh" ]]; then
     databaseHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${databaseServerName}" "host")
   else

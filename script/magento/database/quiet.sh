@@ -96,7 +96,7 @@ fi
 database=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${serverName}" "database")
 
 if [[ "${serverType}" == "local" ]]; then
-  databaseHost="localhost"
+  databaseHost="127.0.0.1"
 elif [[ "${serverType}" == "ssh" ]]; then
   databaseHost=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "host")
 fi
