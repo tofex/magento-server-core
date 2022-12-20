@@ -48,7 +48,7 @@ executeScript()
     parsedParameters+=( "${parameter}" )
   done
 
-  echo "--- Executing script at: ${filePath} on local server: ${serverName} ---"
+  echo "Executing script at: ${filePath} on local server: ${serverName}"
   "${filePath}" "${parsedParameters[@]}"
 }
 
@@ -167,7 +167,7 @@ executeScriptWithSSH()
   copyFileToSSH "${sshUser}" "${sshHost}" "${currentBasePath}/../prepare-parameters.sh" "/tmp/prepare-parameters.sh"
   copyFileToSSH "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
 
-  echo "--- Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName} ---"
+  echo "Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName}"
   # shellcheck disable=SC2029
   ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
 
