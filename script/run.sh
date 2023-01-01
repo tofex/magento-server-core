@@ -4,6 +4,47 @@ currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${currentPath}/base.sh"
 
+addDatabaseAnonymizeParameters()
+{
+  local databaseAnonymizeServerName="${1}"
+  local databaseAnonymize="${2}"
+
+  local databaseAnonymizeServerType
+  local databaseAnonymizeHost
+  local databaseAnonymizePort
+  local databaseAnonymizeUser
+  local databaseAnonymizePassword
+  local databaseAnonymizeName
+  local databaseAnonymizeType
+  local databaseAnonymizeVersion
+
+  databaseAnonymizeServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymizeServerName}" "type")
+
+  if [[ "${databaseAnonymizeServerType}" == "local" ]]; then
+    databaseAnonymizeHost="127.0.0.1"
+  elif [[ "${databaseAnonymizeServerType}" == "ssh" ]]; then
+    databaseAnonymizeHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymizeServerName}" "host")
+  else
+    echo "Unsupported Database server type: ${databaseAnonymizeServerType}"
+    exit 1
+  fi
+  databaseAnonymizePort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "port")
+  databaseAnonymizeUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "user")
+  databaseAnonymizePassword=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "password")
+  databaseAnonymizeName=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "name")
+  databaseAnonymizeType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "type")
+  databaseAnonymizeVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "version")
+
+  runParameters+=( "--databaseAnonymizeServerName \"${databaseAnonymizeServerName}\"" )
+  runParameters+=( "--databaseAnonymizeHost \"${databaseAnonymizeHost}\"" )
+  runParameters+=( "--databaseAnonymizePort \"${databaseAnonymizePort}\"" )
+  runParameters+=( "--databaseAnonymizeUser \"${databaseAnonymizeUser}\"" )
+  runParameters+=( "--databaseAnonymizePassword \"${databaseAnonymizePassword}\"" )
+  runParameters+=( "--databaseAnonymizeName \"${databaseAnonymizeName}\"" )
+  runParameters+=( "--databaseAnonymizeType \"${databaseAnonymizeType}\"" )
+  runParameters+=( "--databaseAnonymizeVersion \"${databaseAnonymizeVersion}\"" )
+}
+
 executeServers="${1}"
 shift
 scriptPath="${1}"
@@ -123,6 +164,8 @@ for serverName in "${serverList[@]}"; do
         addWebServerParameters "${serverName}" "${serverSystem}"
       elif [[ "${executeServerSystem}" == "database" ]]; then
         addDatabaseParameters "${serverName}" "${serverSystem}"
+      elif [[ "${executeServerSystem}" == "databaseAnonymize" ]]; then
+        addDatabaseAnonymizeParameters "${serverName}" "${serverSystem}"
       elif [[ "${executeServerSystem}" == "redisCache" ]]; then
         addRedisCacheParameters "${serverName}" "${serverSystem}"
       elif [[ "${executeServerSystem}" == "redisFPC" ]]; then
