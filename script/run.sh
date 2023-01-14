@@ -4,6 +4,82 @@ currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${currentPath}/base.sh"
 
+addWebServerParameters()
+{
+  local webServerServerName="${1}"
+  local webServer="${2}"
+
+  local webServerType
+  local webServerVersion
+  local webServerHost
+  local httpPort
+  local sslPort
+  local proxyHost
+  local proxyPort
+  local webPath
+  local webUser
+  local webGroup
+
+  webServerServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServerServerName}" "type")
+
+  if [[ "${webServerServerType}" == "local" ]]; then
+    webServerHost="localhost"
+  elif [[ "${webServerServerType}" == "ssh" ]]; then
+    webServerHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServerServerName}" "host")
+  else
+    >&2 echo "Unsupported web server server type: ${webServerServerType}"
+    exit 1
+  fi
+  webServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServer}" "type")
+  webServerVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServer}" "version")
+  httpPort=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "httpPort")
+  sslPort=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "sslPort")
+  proxyHost=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "proxyHost")
+  proxyPort=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "proxyPort")
+  webPath=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServerServerName}" "webPath")
+  webUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webUser")
+  webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webGroup")
+  phpExecutable=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "php")
+
+  runParameters+=( "--webServerServerName \"${webServerServerName}\"" )
+  runParameters+=( "--webServerId \"${webServer}\"" )
+  runParameters+=( "--webServerType \"${webServerType}\"" )
+  runParameters+=( "--webServerVersion \"${webServerVersion}\"" )
+  runParameters+=( "--webServerHost \"${webServerHost}\"" )
+  if [[ -n "${httpPort}" ]]; then
+    runParameters+=( "--httpPort \"${httpPort}\"" )
+  fi
+  if [[ -n "${sslPort}" ]]; then
+    runParameters+=( "--sslPort \"${sslPort}\"" )
+  fi
+  if [[ -n "${proxyHost}" ]]; then
+    runParameters+=( "--proxyHost \"${proxyHost}\"" )
+  fi
+  if [[ -n "${proxyPort}" ]]; then
+    runParameters+=( "--proxyPort \"${proxyPort}\"" )
+  fi
+  runParameters+=( "--webPath \"${webPath}\"" )
+  if [[ -n "${webUser}" ]]; then
+    runParameters+=( "--webUser \"${webUser}\"" )
+  fi
+  if [[ -n "${webGroup}" ]]; then
+    runParameters+=( "--webGroup \"${webGroup}\"" )
+  fi
+
+  if [[ -n "${phpExecutable}" ]]; then
+    phpExecutableFound=0
+    for runParameter in "${runParameters[@]}"; do
+      if [[ "${runParameter}" =~ ^--phpExecutable ]]; then
+        phpExecutableFound=1
+      fi
+    done
+
+    if [[ "${phpExecutableFound}" == 0 ]]; then
+      runParameters+=( "--phpExecutable \"${phpExecutable}\"" )
+    fi
+  fi
+}
+
 addDatabaseAnonymizeParameters()
 {
   local databaseAnonymizeServerName="${1}"

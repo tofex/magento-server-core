@@ -17,6 +17,7 @@ while [[ "$#" -gt 0 ]]; do
       value=$(echo "${parameter:${#key}}" | xargs)
       # shellcheck disable=SC2034
       parameters["${key}"]="${value}"
+      #>&2 echo eval "${key}=\"${value}\""
       eval "${key}=\"${value}\""
       continue
     fi
@@ -29,17 +30,20 @@ while [[ "$#" -gt 0 ]]; do
     fi
     if [[ "$#" -eq 0 ]]; then
       parameters["${key}"]=1
+      #>&2 echo eval "${key}=1"
       eval "${key}=1"
     else
       value="${1}"
       if [[ "${value:0:2}" == "--" ]]; then
         parameters["${key}"]=1
+        #>&2 echo eval "${key}=1"
         eval "${key}=1"
         continue
       fi
       shift
       # shellcheck disable=SC2034
       parameters["${key}"]="${value}"
+      #>&2 echo eval "${key}=\"${value}\""
       eval "${key}=\"${value}\""
     fi
   else
@@ -51,6 +55,8 @@ set -- "${unparsedParameters[@]}"
 if test "${parameters["help"]+isset}" || test "${parameters["?"]+isset}"; then
   if [[ $(declare -F "usage" | wc -l) -gt 0 ]]; then
     usage
-    exit 0
+  else
+    echo "No options available"
   fi
+  exit 0
 fi
