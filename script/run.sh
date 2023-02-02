@@ -36,8 +36,10 @@ addWebServerParameters()
   sslPort=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "sslPort")
   proxyHost=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "proxyHost")
   proxyPort=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServer}" "proxyPort")
+  documentRootIsPub=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "documentRootIsPub")
   webPath=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServerServerName}" "webPath")
   webUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webUser")
+  webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webGroup")
   webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "webGroup")
   phpExecutable=$(ini-parse "${currentPath}/../../env.properties" "no" "${webServerServerName}" "php")
 
@@ -57,6 +59,11 @@ addWebServerParameters()
   fi
   if [[ -n "${proxyPort}" ]]; then
     runParameters+=( "--proxyPort \"${proxyPort}\"" )
+  fi
+  if [[ -n "${documentRootIsPub}" ]]; then
+    runParameters+=( "--documentRootIsPub \"${documentRootIsPub}\"" )
+  else
+    runParameters+=( "--documentRootIsPub \"yes\"" )
   fi
   runParameters+=( "--webPath \"${webPath}\"" )
   if [[ -n "${webUser}" ]]; then
