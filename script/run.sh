@@ -148,13 +148,13 @@ if [[ -z "${executeScriptWithSSH}" ]]; then
 fi
 
 #readarray -d , -t executeServerList < <(printf '%s' "${executeServers}")
-IFS=, read -d "" -r -a executeServerList < <(printf '%s' "${executeServers}")
+IFS=, read -d "" -r -a executeServerList < <(printf '%s' "${executeServers}") || echo -n ""
 
 executeServer="${executeServerList[0]}"
 #readarray -d : -t executeServerParts < <(printf '%s' "${executeServer}")
-IFS=: read -d "" -r -a executeServerParts < <(printf '%s' "${executeServer}")
+IFS=: read -d "" -r -a executeServerParts < <(printf '%s' "${executeServer}") || echo -n ""
 #readarray -d : -t executeServerParts < <(printf '%s' "${executeServer}")
-IFS=: read -d "" -r -a executeServerParts < <(printf '%s' "${executeServer}")
+IFS=: read -d "" -r -a executeServerParts < <(printf '%s' "${executeServer}") || echo -n ""
 executeServerSystem="${executeServerParts[0]}"
 executeServerName="${executeServerParts[1]}"
 if [[ -z "${executeServerName}" ]]; then
