@@ -13,12 +13,15 @@ while [[ "$#" -gt 0 ]]; do
   if [[ "${parameter:0:2}" == "--" ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]+ ]] || [[ "${parameter}" =~ ^-\?$ ]]; then
     if [[ "${parameter}" =~ ^--[[:alpha:]]+[[:space:]]+ ]]; then
       parameter="${parameter:2}"
-      key=$(echo "${parameter}" | grep -oP '[[:alpha:]]+(?=\s)' | tr -d "\n")
-      value=$(echo "${parameter:${#key}}" | xargs)
-      # shellcheck disable=SC2034
-      parameters["${key}"]="${value}"
-      #>&2 echo eval "${key}=\"${value}\""
-      eval "${key}=\"${value}\""
+      #key=$(echo "${parameter}" | grep -oP '[[:alpha:]]+(?=\s)' | tr -d "\n")
+      key=$(echo "${parameter}" | grep -oE '^[[:alpha:]]+' | tr -d "\n")
+      if [[ -n "${key}" ]]; then
+        value=$(echo "${parameter:${#key}}" | xargs)
+        # shellcheck disable=SC2034
+        parameters["${key}"]="${value}"
+        #>&2 echo eval "${key}=\"${value}\""
+        eval "${key}=\"${value}\""
+      fi
       continue
     fi
     if [[ "${parameter:0:2}" == "--" ]]; then
