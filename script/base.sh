@@ -26,7 +26,8 @@ executeScript()
       elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
-        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        #readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        IFS=" " read -d "" -r -a parameterParts < <(printf '%s' "${parameter}")
         parsedParameters+=( "${parameterParts[0]}" )
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
@@ -34,7 +35,8 @@ executeScript()
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
-        readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        #readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        IFS=: read -d "" -r -a parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
         parameterFilePath="${parameterFilePathParts[0]}"
       fi
 
@@ -75,7 +77,8 @@ executeScriptQuiet()
       elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
-        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        #readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        IFS=" " read -d "" -r -a parameterParts < <(printf '%s' "${parameter}")
         parsedParameters+=( "${parameterParts[0]}" )
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
@@ -83,7 +86,8 @@ executeScriptQuiet()
       parameterFilePath=$(replacePlaceHolder "${parameterFilePath}" "${parameters[@]}")
 
       if [[ "${parameterFilePath}" =~ ":" ]]; then
-        readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        #readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        IFS=: read -d "" -r -a parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
         parameterFilePath="${parameterFilePathParts[0]}"
       fi
 
@@ -128,7 +132,8 @@ executeScriptWithSSH()
       elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
-        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        #readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        IFS=" " read -d "" -r -a parameterParts < <(printf '%s' "${parameter}")
         parsedParameters+=( "${parameterParts[0]}" )
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
@@ -137,7 +142,8 @@ executeScriptWithSSH()
 
       local parameterRemoteFileName
       if [[ "${parameterFilePath}" =~ ":" ]]; then
-        readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        #readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        IFS=: read -d "" -r -a parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
         parameterFilePath="${parameterFilePathParts[0]}"
         parameterRemoteFileName="/tmp/${parameterFilePathParts[1]}"
       else
@@ -207,7 +213,8 @@ executeScriptWithSSHQuiet()
       elif [[ "${parameter}" =~ ^script:.* ]]; then
         parameterFilePath="${parameter:7}"
       else
-        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        #readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        IFS=" " read -d "" -r -a parameterParts < <(printf '%s' "${parameter}")
         parsedParameters+=( "${parameterParts[0]}" )
         parameterFilePath=$(echo "${parameterParts[1]}" | tr -d '"')
         parameterFilePath="${parameterFilePath:7}"
@@ -216,7 +223,8 @@ executeScriptWithSSHQuiet()
 
       local parameterRemoteFileName
       if [[ "${parameterFilePath}" =~ ":" ]]; then
-        readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        #readarray -d : -t parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
+        IFS=: read -d "" -r -a parameterFilePathParts < <(printf '%s' "${parameterFilePath}")
         parameterFilePath="${parameterFilePathParts[0]}"
         parameterRemoteFileName="/tmp/${parameterFilePathParts[1]}"
       else
@@ -272,7 +280,8 @@ replacePlaceHolder()
     shift
     if [[ "${parameter:0:2}" == "--" ]] || [[ "${parameter}" =~ ^-[[:alpha:]][[:space:]]* ]] || [[ "${parameter}" =~ ^-\?$ ]]; then
       if [[ "${parameter}" =~ ^--[[:alpha:]]*[[:space:]] ]]; then
-        readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        #readarray -d " " -t parameterParts < <(printf '%s' "${parameter}")
+        IFS=" " read -d "" -r -a parameterParts < <(printf '%s' "${parameter}")
         key="${parameterParts[0]:2}"
         value=$(echo "${parameterParts[1]}" | tr -d '"')
         preparedParameters["${key}"]="${value}"
