@@ -70,8 +70,8 @@ for server in "${serverList[@]}"; do
   if [[ -n "${database}" ]]; then
     serverType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${server}" "type")
 
-    if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
-      echo "Invalid database server type: ${serverType} of server: ${server}"
+    if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "remote" ]] && [[ "${serverType}" != "ssh" ]]; then
+      >&2 echo "Invalid database server type: ${serverType} of server: ${server}"
       continue
     fi
 
@@ -88,8 +88,8 @@ fi
 
 serverType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "type")
 
-if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
-  echo "Invalid database server type: ${serverType} of server: ${serverName}"
+if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "remote" ]] && [[ "${serverType}" != "ssh" ]]; then
+  >&2 echo "Invalid database server type: ${serverType} of server: ${serverName}"
   exit 1
 fi
 
@@ -97,7 +97,7 @@ database=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${serverN
 
 if [[ "${serverType}" == "local" ]]; then
   databaseHost="127.0.0.1"
-elif [[ "${serverType}" == "ssh" ]]; then
+elif [[ "${serverType}" == "remote" ]] || [[ "${serverType}" == "ssh" ]]; then
   databaseHost=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "host")
 fi
 
@@ -151,7 +151,7 @@ parameters+=( "-b \"${databaseName}\"" )
 parameters+=( "-t \"${databaseType}\"" )
 parameters+=( "-v \"${databaseVersion}\"" )
 
-if [[ "${serverType}" == "local" ]]; then
+if [[ "${serverType}" == "local" ]] || [[ "${serverType}" == "remote" ]]; then
   executeScriptQuiet "${serverName}" "${scriptPath}" "${parameters[@]}"
 elif [[ "${serverType}" == "ssh" ]]; then
   sshUser=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "user")
