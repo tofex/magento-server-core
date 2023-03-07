@@ -24,7 +24,7 @@ addWebServerParameters()
 
   if [[ "${webServerServerType}" == "local" ]]; then
     webServerHost="localhost"
-  elif [[ "${webServerServerType}" == "ssh" ]]; then
+  elif [[ "${webServerServerType}" == "remote" ]] || [[ "${webServerServerType}" == "ssh" ]]; then
     webServerHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${webServerServerName}" "host")
   else
     >&2 echo "Unsupported web server server type: ${webServerServerType}"
@@ -87,6 +87,47 @@ addWebServerParameters()
   fi
 }
 
+addDatabaseParameters()
+{
+  local databaseServerName="${1}"
+  local database="${2}"
+
+  local databaseServerType
+  local databaseHost
+  local databasePort
+  local databaseUser
+  local databasePassword
+  local databaseName
+  local databaseType
+  local databaseVersion
+
+  databaseServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseServerName}" "type")
+
+  if [[ "${databaseServerType}" == "local" ]]; then
+    databaseHost="127.0.0.1"
+  elif [[ "${databaseServerType}" == "remote" ]] || [[ "${databaseServerType}" == "ssh" ]]; then
+    databaseHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseServerName}" "host")
+  else
+    >&2 echo "Unsupported Database server type: ${databaseServerType}"
+    exit 1
+  fi
+  databasePort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "port")
+  databaseUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "user")
+  databasePassword=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "password")
+  databaseName=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "name")
+  databaseType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "type")
+  databaseVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "version")
+
+  runParameters+=( "--databaseServerName \"${databaseServerName}\"" )
+  runParameters+=( "--databaseHost \"${databaseHost}\"" )
+  runParameters+=( "--databasePort \"${databasePort}\"" )
+  runParameters+=( "--databaseUser \"${databaseUser}\"" )
+  runParameters+=( "--databasePassword \"${databasePassword}\"" )
+  runParameters+=( "--databaseName \"${databaseName}\"" )
+  runParameters+=( "--databaseType \"${databaseType}\"" )
+  runParameters+=( "--databaseVersion \"${databaseVersion}\"" )
+}
+
 addDatabaseAnonymizeParameters()
 {
   local databaseAnonymizeServerName="${1}"
@@ -105,10 +146,10 @@ addDatabaseAnonymizeParameters()
 
   if [[ "${databaseAnonymizeServerType}" == "local" ]]; then
     databaseAnonymizeHost="127.0.0.1"
-  elif [[ "${databaseAnonymizeServerType}" == "ssh" ]]; then
+  elif [[ "${databaseAnonymizeServerType}" == "remote" ]] || [[ "${databaseAnonymizeServerType}" == "ssh" ]]; then
     databaseAnonymizeHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymizeServerName}" "host")
   else
-    echo "Unsupported Database server type: ${databaseAnonymizeServerType}"
+    >&2 echo "Unsupported Database server type: ${databaseAnonymizeServerType}"
     exit 1
   fi
   databaseAnonymizePort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${databaseAnonymize}" "port")
@@ -135,7 +176,7 @@ shift
 parameters=("$@")
 
 if [[ ! -f "${currentPath}/../../env.properties" ]]; then
-  echo "No environment specified!"
+  >&2 echo "No environment specified!"
   exit 1
 fi
 
@@ -164,7 +205,7 @@ fi
 if [[ "${executeServerSystem}" == "host" ]]; then
   hostList=( $(ini-parse "${currentPath}/../../env.properties" "yes" "system" "host") )
   if [[ "${#hostList[@]}" -eq 0 ]]; then
-    echo "No hosts specified!"
+    >&2 echo "No hosts specified!"
     exit 1
   fi
 
@@ -266,7 +307,7 @@ for serverName in "${serverList[@]}"; do
       if [[ "${#executeServerList[@]}" -eq 1 ]]; then
         serverType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "type")
 
-        if [[ "${serverType}" == "local" ]]; then
+        if [[ "${serverType}" == "local" ]] || [[ "${serverType}" == "remote" ]]; then
           "${executeScript}" "${serverName}" "${scriptPath}" "${runParameters[@]}"
         elif [[ "${serverType}" == "ssh" ]]; then
           sshUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${serverName}" "user")

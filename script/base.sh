@@ -13,7 +13,7 @@ executeScript()
   filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
-    echo "Script at: ${filePath} does not exist"
+    >&2 echo "Script at: ${filePath} does not exist"
     exit 1
   fi
 
@@ -41,7 +41,7 @@ executeScript()
       fi
 
       if [[ ! -f "${parameterFilePath}" ]]; then
-        echo "File at: ${parameterFilePath} does not exist"
+        >&2 echo "File at: ${parameterFilePath} does not exist"
         exit 1
       fi
 
@@ -118,7 +118,7 @@ executeScriptWithSSH()
   filePath=$(replacePlaceHolder "${filePath}" "${parameters[@]}")
 
   if [[ ! -f "${filePath}" ]]; then
-    echo "Script at: ${filePath} does not exist"
+    >&2 echo "Script at: ${filePath} does not exist"
     exit 1
   fi
 
@@ -153,7 +153,7 @@ executeScriptWithSSH()
       fi
 
       if [[ ! -f "${parameterFilePath}" ]]; then
-        echo "File at: ${parameterFilePath} does not exist"
+        >&2 echo "File at: ${parameterFilePath} does not exist"
         exit 1
       fi
 
@@ -449,7 +449,7 @@ copyFileToSSH()
   local remoteFileName="${4}"
 
   if [[ ! -f "${filePath}" ]]; then
-    echo "File at: ${filePath} does not exist"
+    >&2 echo "File at: ${filePath} does not exist"
     exit 1
   fi
 
@@ -525,25 +525,25 @@ addInstallParameters()
 
   magentoVersion=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "install" "magentoVersion")
   if [[ -z "${magentoVersion}" ]]; then
-    echo "No magento version specified!"
+    >&2 echo "No magento version specified!"
     exit 1
   fi
 
   magentoEdition=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "install" "magentoEdition")
   if [[ -z "${magentoEdition}" ]]; then
-    echo "No magento edition specified!"
+    >&2 echo "No magento edition specified!"
     exit 1
   fi
 
   magentoMode=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "install" "magentoMode")
   if [[ -z "${magentoMode}" ]]; then
-    echo "No magento mode specified!"
+    >&2 echo "No magento mode specified!"
     exit 1
   fi
 
   repositoryList=( $(ini-parse "${currentBasePath}/../../env.properties" "yes" "install" "repositories") )
   if [[ "${#repositoryList[@]}" -eq 0 ]]; then
-    echo "No composer repositories specified!"
+    >&2 echo "No composer repositories specified!"
     exit 1
   fi
   repositories=$(IFS=,; printf '%s' "${repositoryList[*]}")
@@ -561,47 +561,6 @@ addInstallParameters()
   if [[ -n "${adminPath}" ]]; then
     runParameters+=( "--adminPath \"${adminPath}\"" )
   fi
-}
-
-addDatabaseParameters()
-{
-  local databaseServerName="${1}"
-  local database="${2}"
-
-  local databaseServerType
-  local databaseHost
-  local databasePort
-  local databaseUser
-  local databasePassword
-  local databaseName
-  local databaseType
-  local databaseVersion
-
-  databaseServerType=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${databaseServerName}" "type")
-
-  if [[ "${databaseServerType}" == "local" ]]; then
-    databaseHost="127.0.0.1"
-  elif [[ "${databaseServerType}" == "ssh" ]]; then
-    databaseHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${databaseServerName}" "host")
-  else
-    echo "Unsupported Database server type: ${databaseServerType}"
-    exit 1
-  fi
-  databasePort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "port")
-  databaseUser=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "user")
-  databasePassword=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "password")
-  databaseName=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "name")
-  databaseType=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "type")
-  databaseVersion=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${database}" "version")
-
-  runParameters+=( "--databaseServerName \"${databaseServerName}\"" )
-  runParameters+=( "--databaseHost \"${databaseHost}\"" )
-  runParameters+=( "--databasePort \"${databasePort}\"" )
-  runParameters+=( "--databaseUser \"${databaseUser}\"" )
-  runParameters+=( "--databasePassword \"${databasePassword}\"" )
-  runParameters+=( "--databaseName \"${databaseName}\"" )
-  runParameters+=( "--databaseType \"${databaseType}\"" )
-  runParameters+=( "--databaseVersion \"${databaseVersion}\"" )
 }
 
 addRedisCacheParameters()
@@ -626,7 +585,7 @@ addRedisCacheParameters()
   elif [[ "${redisCacheServerType}" == "ssh" ]]; then
     redisCacheHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisCacheServerName}" "host")
   else
-    echo "Unsupported Redis cache server type: ${redisCacheServerType}"
+    >&2 echo "Unsupported Redis cache server type: ${redisCacheServerType}"
     exit 1
   fi
   redisCachePort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisCache}" "port")
@@ -673,7 +632,7 @@ addRedisFPCParameters()
   elif [[ "${redisFPCServerType}" == "ssh" ]]; then
     redisFPCHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisFPCServerName}" "host")
   else
-    echo "Unsupported Redis FPC server type: ${redisFPCServerType}"
+    >&2 echo "Unsupported Redis FPC server type: ${redisFPCServerType}"
     exit 1
   fi
   redisFPCPort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisFPC}" "port")
@@ -718,7 +677,7 @@ addRedisSessionParameters()
   elif [[ "${redisSessionServerType}" == "ssh" ]]; then
     redisSessionHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisSessionServerName}" "host")
   else
-    echo "Unsupported Redis session server type: ${redisSessionServerType}"
+    >&2 echo "Unsupported Redis session server type: ${redisSessionServerType}"
     exit 1
   fi
   redisSessionPort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${redisSession}" "port")
@@ -756,7 +715,7 @@ addElasticsearchParameters()
   elif [[ "${elasticsearchServerType}" == "ssh" ]]; then
     elasticsearchHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearchServerName}" "host")
   else
-    echo "Unsupported Elasticsearch server type: ${elasticsearchServerType}"
+    >&2 echo "Unsupported Elasticsearch server type: ${elasticsearchServerType}"
     exit 1
   fi
   elasticsearchPort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearch}" "port")
