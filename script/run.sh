@@ -113,7 +113,7 @@ addDatabaseParameters()
   fi
   databasePort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "port")
   databaseUser=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "user")
-  databasePassword=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "password")
+  databasePassword=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "password" | sed 's/\$/\\\$/g')
   databaseName=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "name")
   databaseType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "type")
   databaseVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${database}" "version")
