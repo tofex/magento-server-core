@@ -57,9 +57,9 @@ if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "ssh" ]]; then
   exit 1
 fi
 
-webPath=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${serverName}" "webPath")
-webUser=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${serverName}" "webUser")
-webGroup=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${serverName}" "webGroup")
+webPath=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "path")
+webUser=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "user")
+webGroup=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "group")
 webServerType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "type")
 webServerVersion=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "version")
 httpPort=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "httpPort")

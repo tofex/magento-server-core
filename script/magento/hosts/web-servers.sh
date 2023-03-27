@@ -135,9 +135,9 @@ for host in "${hostList[@]}"; do
         continue
       fi
 
-      webPath=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${server}" "webPath")
-      webUser=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${server}" "webUser")
-      webGroup=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${server}" "webGroup")
+      webPath=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "path")
+      webUser=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "user")
+      webGroup=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "group")
       webServerType=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "type")
       webServerVersion=$(ini-parse "${currentPath}/../../../../env.properties" "yes" "${webServer}" "version")
       httpPort=$(ini-parse "${currentPath}/../../../../env.properties" "no" "${webServer}" "httpPort")
