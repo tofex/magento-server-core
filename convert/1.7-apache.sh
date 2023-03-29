@@ -12,6 +12,14 @@ if [[ -f "${currentPath}/../../env.properties" ]]; then
         if [[ -n "${webPath}" ]]; then
           ini-move "${currentPath}/../../env.properties" "yes" "${server}" "webPath" "${webServer}" "path"
         fi
+        webUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "webUser")
+        if [[ -n "${webUser}" ]]; then
+          ini-move "${currentPath}/../../env.properties" "yes" "${server}" "webUser" "${webServer}" "user"
+        fi
+        webGroup=$(ini-parse "${currentPath}/../../env.properties" "no" "${server}" "webGroup")
+        if [[ -n "${webGroup}" ]]; then
+          ini-move "${currentPath}/../../env.properties" "yes" "${server}" "webGroup" "${webServer}" "group"
+        fi
       fi
     done
   fi
