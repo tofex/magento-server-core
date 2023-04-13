@@ -1,6 +1,6 @@
 {
     "name": "tofex/magento-server-core",
-    "version": "1.0.77",
+    "version": "1.0.78",
     "type": "magento-server-component",
     "description": "Tofex Magento Server Core",
     "license": "MIT",

@@ -71,7 +71,7 @@ for server in "${serverList[@]}"; do
     serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${server}" "type")
 
     if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "remote" ]] && [[ "${serverType}" != "ssh" ]]; then
-      echo "Invalid database server type: ${serverType} of server: ${server}"
+      >&2 echo "Invalid database server type: ${serverType} of server: ${server}"
       continue
     fi
 
@@ -89,14 +89,14 @@ fi
 serverType=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "type")
 
 if [[ "${serverType}" != "local" ]] && [[ "${serverType}" != "remote" ]] && [[ "${serverType}" != "ssh" ]]; then
-  echo "Invalid database server type: ${serverType} of server: ${serverName}"
+  >&2 echo "Invalid database server type: ${serverType} of server: ${serverName}"
   exit 1
 fi
 
 database=$(ini-parse "${currentPath}/../../../env.properties" "no" "${serverName}" "database")
 
 if [[ "${serverType}" == "local" ]]; then
-  databaseHost="localhost"
+  databaseHost="127.0.0.1"
 elif [[ "${serverType}" == "remote" ]] || [[ "${serverType}" == "ssh" ]]; then
   databaseHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
 fi
