@@ -168,6 +168,57 @@ addDatabaseAnonymizeParameters()
   runParameters+=( "--databaseAnonymizeVersion \"${databaseAnonymizeVersion}\"" )
 }
 
+addElasticsearchParameters()
+{
+  local elasticsearchServerName="${1}"
+  local elasticsearch="${2}"
+
+  local elasticsearchServerType
+  local elasticsearchEngine
+  local elasticsearchVersion
+  local elasticsearchHost
+  local elasticsearchPort
+  local elasticsearchPrefix
+  local elasticsearchUser
+  local elasticsearchPassword
+
+  elasticsearchServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${elasticsearchServerName}" "type")
+
+  elasticsearchEngine=$(ini-parse "${currentPath}/../../env.properties" "no" "${elasticsearch}" "engine")
+  elasticsearchVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${elasticsearch}" "version")
+  if [[ "${elasticsearchServerType}" == "local" ]]; then
+    elasticsearchHost="localhost"
+  elif [[ "${elasticsearchServerType}" == "ssh" ]]; then
+    elasticsearchHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${elasticsearchServerName}" "host")
+  else
+    >&2 echo "Unsupported Elasticsearch server type: ${elasticsearchServerType}"
+    exit 1
+  fi
+  elasticsearchPort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${elasticsearch}" "port")
+  elasticsearchPrefix=$(ini-parse "${currentPath}/../../env.properties" "no" "${elasticsearch}" "prefix")
+  elasticsearchUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${elasticsearch}" "user")
+  elasticsearchPassword=$(ini-parse "${currentPath}/../../env.properties" "no" "${elasticsearch}" "password")
+
+  if [[ -z "${elasticsearchPrefix}" ]]; then
+    elasticsearchPrefix="magento"
+  fi
+
+  runParameters+=( "--elasticsearchServerName \"${elasticsearchServerName}\"" )
+  if [[ -n "${elasticsearchEngine}" ]]; then
+    runParameters+=( "--elasticsearchEngine \"${elasticsearchEngine}\"" )
+  fi
+  runParameters+=( "--elasticsearchVersion \"${elasticsearchVersion}\"" )
+  runParameters+=( "--elasticsearchHost \"${elasticsearchHost}\"" )
+  runParameters+=( "--elasticsearchPort \"${elasticsearchPort}\"" )
+  runParameters+=( "--elasticsearchPrefix \"${elasticsearchPrefix}\"" )
+  if [[ -n "${elasticsearchUser}" ]]; then
+    runParameters+=( "--elasticsearchUser \"${elasticsearchUser}\"" )
+  fi
+  if [[ -n "${elasticsearchPassword}" ]]; then
+    runParameters+=( "--elasticsearchPassword \"${elasticsearchPassword}\"" )
+  fi
+}
+
 executeServers="${1}"
 shift
 scriptPath="${1}"

@@ -694,52 +694,6 @@ addRedisSessionParameters()
   runParameters+=( "--redisSessionDatabase \"${redisSessionDatabase}\"" )
 }
 
-addElasticsearchParameters()
-{
-  local elasticsearchServerName="${1}"
-  local elasticsearch="${2}"
-
-  local elasticsearchServerType
-  local elasticsearchVersion
-  local elasticsearchHost
-  local elasticsearchPort
-  local elasticsearchPrefix
-  local elasticsearchUser
-  local elasticsearchPassword
-
-  elasticsearchServerType=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearchServerName}" "type")
-
-  elasticsearchVersion=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearch}" "version")
-  if [[ "${elasticsearchServerType}" == "local" ]]; then
-    elasticsearchHost="localhost"
-  elif [[ "${elasticsearchServerType}" == "ssh" ]]; then
-    elasticsearchHost=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearchServerName}" "host")
-  else
-    >&2 echo "Unsupported Elasticsearch server type: ${elasticsearchServerType}"
-    exit 1
-  fi
-  elasticsearchPort=$(ini-parse "${currentBasePath}/../../env.properties" "yes" "${elasticsearch}" "port")
-  elasticsearchPrefix=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "prefix")
-  elasticsearchUser=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "user")
-  elasticsearchPassword=$(ini-parse "${currentBasePath}/../../env.properties" "no" "${elasticsearch}" "password")
-
-  if [[ -z "${elasticsearchPrefix}" ]]; then
-    elasticsearchPrefix="magento"
-  fi
-
-  runParameters+=( "--elasticsearchServerName \"${elasticsearchServerName}\"" )
-  runParameters+=( "--elasticsearchVersion \"${elasticsearchVersion}\"" )
-  runParameters+=( "--elasticsearchHost \"${elasticsearchHost}\"" )
-  runParameters+=( "--elasticsearchPort \"${elasticsearchPort}\"" )
-  runParameters+=( "--elasticsearchPrefix \"${elasticsearchPrefix}\"" )
-  if [[ -n "${elasticsearchUser}" ]]; then
-    runParameters+=( "--elasticsearchUser \"${elasticsearchUser}\"" )
-  fi
-  if [[ -n "${elasticsearchPassword}" ]]; then
-    runParameters+=( "--elasticsearchPassword \"${elasticsearchPassword}\"" )
-  fi
-}
-
 addHostParameters()
 {
   local hostName="${1}"
