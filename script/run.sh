@@ -219,6 +219,62 @@ addElasticsearchParameters()
   fi
 }
 
+addSmtpParameters()
+{
+  local smtpEnabled
+  local smtpHost
+  local smtpPort
+  local smtpProtocol
+  local smtpAuthentication
+  local smtpUser
+  local smtpPassword
+
+  smtpEnabled=$(ini-parse "${currentPath}/../../env.properties" "yes" "smtp" "enabled")
+  if [[ -z "${smtpEnabled}" ]]; then
+    >&2 echo "No SMTP enabled specified!"
+    exit 1
+  fi
+  runParameters+=( "--smtpEnabled \"${smtpEnabled}\"" )
+
+  if [[ "${smtpEnabled}" == "yes" ]]; then
+    smtpHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "smtp" "host")
+    if [[ -z "${smtpHost}" ]]; then
+      >&2 echo "No SMTP host specified!"
+      exit 1
+    fi
+
+    smtpPort=$(ini-parse "${currentPath}/../../env.properties" "yes" "smtp" "port")
+    if [[ -z "${smtpPort}" ]]; then
+      >&2 echo "No SMTP port specified!"
+      exit 1
+    fi
+
+    smtpProtocol=$(ini-parse "${currentPath}/../../env.properties" "yes" "smtp" "protocol")
+    if [[ -z "${smtpProtocol}" ]]; then
+      >&2 echo "No SMTP protocol specified!"
+      exit 1
+    fi
+
+    smtpAuthentication=$(ini-parse "${currentPath}/../../env.properties" "no" "smtp" "authentication")
+
+    runParameters+=( "--smtpHost \"${smtpHost}\"" )
+    runParameters+=( "--smtpPort \"${smtpPort}\"" )
+    runParameters+=( "--smtpProtocol \"${smtpProtocol}\"" )
+
+    if [[ -n "${smtpAuthentication}" ]]; then
+      runParameters+=( "--smtpAuthentication \"${smtpAuthentication}\"" )
+
+      if [[ "${smtpAuthentication}" != "none" ]]; then
+        smtpUser=$(ini-parse "${currentPath}/../../env.properties" "no" "smtp" "user")
+        smtpPassword=$(ini-parse "${currentPath}/../../env.properties" "no" "smtp" "password")
+
+        runParameters+=( "--smtpUser \"${smtpUser}\"" )
+        runParameters+=( "--smtpPassword \"${smtpPassword}\"" )
+      fi
+    fi
+  fi
+}
+
 executeServers="${1}"
 shift
 scriptPath="${1}"
@@ -295,25 +351,29 @@ fi
 # shellcheck disable=SC2235
 if [[ "${#executeServerList[@]}" -eq 1 ]] && [[ "${executeServerSystem}" == "all" ]]; then
   executeOnAll=1
-elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]]); then
+elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
   if [[ "${executeServerName}" == "local" ]]; then
     runParameters=("${parameters[@]}")
     if [[ "${executeServerSystem}" == "install" ]]; then
       addInstallParameters
     elif [[ "${executeServerSystem}" == "config" ]]; then
       addConfigParameters
+    elif [[ "${executeServerSystem}" == "smtp" ]]; then
+      addSmtpParameters
     fi
     "${executeScript}" "local" "${scriptPath}" "${runParameters[@]}"
     exit 0
   else
     executeOnAll=1
   fi
-elif [[ "${#executeServerList[@]}" -gt 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]]); then
+elif [[ "${#executeServerList[@]}" -gt 1 ]] && ([[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
   runParameters=("${parameters[@]}")
   if [[ "${executeServerSystem}" == "install" ]]; then
     addInstallParameters
   elif [[ "${executeServerSystem}" == "config" ]]; then
     addConfigParameters
+  elif [[ "${executeServerSystem}" == "smtp" ]]; then
+    addSmtpParameters
   fi
   subExecuteServerList=( "${executeServerList[@]:1}" )
   subExecuteServers=$(IFS=,; printf '%s' "${subExecuteServerList[*]}")
@@ -338,6 +398,8 @@ for serverName in "${serverList[@]}"; do
         addInstallParameters
       elif [[ "${executeServerSystem}" == "config" ]]; then
         addConfigParameters
+      elif [[ "${executeServerSystem}" == "smtp" ]]; then
+        addSmtpParameters
       elif [[ "${executeServerSystem}" == "webServer" ]]; then
         addWebServerParameters "${serverName}" "${serverSystem}"
       elif [[ "${executeServerSystem}" == "database" ]]; then
