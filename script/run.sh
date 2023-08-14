@@ -219,6 +219,57 @@ addElasticsearchParameters()
   fi
 }
 
+addOpenSearchParameters()
+{
+  local openSearchServerName="${1}"
+  local openSearch="${2}"
+
+  local openSearchServerType
+  local openSearchEngine
+  local openSearchVersion
+  local openSearchHost
+  local openSearchPort
+  local openSearchPrefix
+  local openSearchUser
+  local openSearchPassword
+
+  openSearchServerType=$(ini-parse "${currentPath}/../../env.properties" "yes" "${openSearchServerName}" "type")
+
+  openSearchEngine=$(ini-parse "${currentPath}/../../env.properties" "no" "${openSearch}" "engine")
+  openSearchVersion=$(ini-parse "${currentPath}/../../env.properties" "yes" "${openSearch}" "version")
+  if [[ "${openSearchServerType}" == "local" ]]; then
+    openSearchHost="localhost"
+  elif [[ "${openSearchServerType}" == "ssh" ]]; then
+    openSearchHost=$(ini-parse "${currentPath}/../../env.properties" "yes" "${openSearchServerName}" "host")
+  else
+    >&2 echo "Unsupported OpenSearch server type: ${openSearchServerType}"
+    exit 1
+  fi
+  openSearchPort=$(ini-parse "${currentPath}/../../env.properties" "yes" "${openSearch}" "port")
+  openSearchPrefix=$(ini-parse "${currentPath}/../../env.properties" "no" "${openSearch}" "prefix")
+  openSearchUser=$(ini-parse "${currentPath}/../../env.properties" "no" "${openSearch}" "user")
+  openSearchPassword=$(ini-parse "${currentPath}/../../env.properties" "no" "${openSearch}" "password")
+
+  if [[ -z "${openSearchPrefix}" ]]; then
+    openSearchPrefix="magento"
+  fi
+
+  runParameters+=( "--openSearchServerName \"${openSearchServerName}\"" )
+  if [[ -n "${openSearchEngine}" ]]; then
+    runParameters+=( "--openSearchEngine \"${openSearchEngine}\"" )
+  fi
+  runParameters+=( "--openSearchVersion \"${openSearchVersion}\"" )
+  runParameters+=( "--openSearchHost \"${openSearchHost}\"" )
+  runParameters+=( "--openSearchPort \"${openSearchPort}\"" )
+  runParameters+=( "--openSearchPrefix \"${openSearchPrefix}\"" )
+  if [[ -n "${openSearchUser}" ]]; then
+    runParameters+=( "--openSearchUser \"${openSearchUser}\"" )
+  fi
+  if [[ -n "${openSearchPassword}" ]]; then
+    runParameters+=( "--openSearchPassword \"${openSearchPassword}\"" )
+  fi
+}
+
 addSmtpParameters()
 {
   local smtpEnabled
@@ -414,6 +465,8 @@ for serverName in "${serverList[@]}"; do
         addRedisSessionParameters "${serverName}" "${serverSystem}"
       elif [[ "${executeServerSystem}" == "elasticsearch" ]]; then
         addElasticsearchParameters "${serverName}" "${serverSystem}"
+      elif [[ "${executeServerSystem}" == "openSearch" ]]; then
+        addOpenSearchParameters "${serverName}" "${serverSystem}"
       fi
 
       if [[ "${#executeServerList[@]}" -eq 1 ]]; then
