@@ -4,6 +4,11 @@ currentPath="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "${currentPath}/base.sh"
 
+addEnvParameters()
+{
+  runParameters+=( "--envPropertyFile \"${currentPath}/../../env.properties\"" )
+}
+
 addSystemParameters()
 {
   local systemName
@@ -415,10 +420,12 @@ fi
 # shellcheck disable=SC2235
 if [[ "${#executeServerList[@]}" -eq 1 ]] && [[ "${executeServerSystem}" == "all" ]]; then
   executeOnAll=1
-elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "system" ]] || [[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
+elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "env" ]] || [[ "${executeServerSystem}" == "system" ]] || [[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
   if [[ "${executeServerName}" == "local" ]]; then
     runParameters=("${parameters[@]}")
-    if [[ "${executeServerSystem}" == "system" ]]; then
+    if [[ "${executeServerSystem}" == "env" ]]; then
+      addEnvParameters
+    elif [[ "${executeServerSystem}" == "system" ]]; then
       addSystemParameters
     elif [[ "${executeServerSystem}" == "install" ]]; then
       addInstallParameters
@@ -432,9 +439,11 @@ elif [[ "${#executeServerList[@]}" -eq 1 ]] && ([[ "${executeServerSystem}" == "
   else
     executeOnAll=1
   fi
-elif [[ "${#executeServerList[@]}" -gt 1 ]] && ([[ "${executeServerSystem}" == "system" ]] || [[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
+elif [[ "${#executeServerList[@]}" -gt 1 ]] && ([[ "${executeServerSystem}" == "env" ]] || [[ "${executeServerSystem}" == "system" ]] || [[ "${executeServerSystem}" == "install" ]] || [[ "${executeServerSystem}" == "config" ]] || [[ "${executeServerSystem}" == "smtp" ]]); then
   runParameters=("${parameters[@]}")
-  if [[ "${executeServerSystem}" == "system" ]]; then
+  if [[ "${executeServerSystem}" == "env" ]]; then
+    addEnvParameters
+  elif [[ "${executeServerSystem}" == "system" ]]; then
     addSystemParameters
   elif [[ "${executeServerSystem}" == "install" ]]; then
     addInstallParameters
@@ -462,7 +471,9 @@ for serverName in "${serverList[@]}"; do
 
       runParameters=("${parameters[@]}")
 
-      if [[ "${executeServerSystem}" == "system" ]]; then
+      if [[ "${executeServerSystem}" == "env" ]]; then
+        addEnvParameters
+      elif [[ "${executeServerSystem}" == "system" ]]; then
         addSystemParameters
       elif [[ "${executeServerSystem}" == "install" ]]; then
         addInstallParameters
