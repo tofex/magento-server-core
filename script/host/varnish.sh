@@ -171,6 +171,10 @@ for host in "${hostList[@]}"; do
   elif [[ "${serverType}" == "ssh" ]]; then
     sshUser=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "user")
     sshHost=$(ini-parse "${currentPath}/../../../env.properties" "yes" "${serverName}" "host")
-    executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${scriptPath}" "${hostParameters[@]}"
+    environment=$(ini-parse "${currentPath}/../../../env.properties" "no" "system" "environment")
+    if [[ -z "${environment}" ]]; then
+      environment="no"
+    fi
+    executeScriptWithSSH "${serverName}" "${sshUser}" "${sshHost}" "${environment}" "${scriptPath}" "${hostParameters[@]}"
   fi
 done
