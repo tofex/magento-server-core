@@ -111,6 +111,8 @@ executeScriptWithSSH()
   shift
   local sshHost="${1}"
   shift
+  local environment="${1}"
+  shift
   local filePath="${1}"
   shift
   local parameters=("$@")
@@ -175,7 +177,11 @@ executeScriptWithSSH()
 
   echo "Executing script at: ${filePath} on remote server: ${serverName} [${sshUser}@${sshHost}] at: ${remoteFileName}"
   # shellcheck disable=SC2029
-  ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
+  if [[ "${environment}" != "no" ]]; then
+    ssh "${sshUser}@${sshHost}" PROJECT_ENV="${environment}" "${remoteFileName}" "${parsedParameters[@]}"
+  else
+    ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
+  fi
 
   removeFileFromSSH "${sshUser}" "${sshHost}" "${remoteFileName}"
   removeFileFromSSH "${sshUser}" "${sshHost}" "/tmp/prepare-parameters.sh"
@@ -192,6 +198,8 @@ executeScriptWithSSHQuiet()
   local sshUser="${1}"
   shift
   local sshHost="${1}"
+  shift
+  local environment="${1}"
   shift
   local filePath="${1}"
   shift
@@ -254,7 +262,11 @@ executeScriptWithSSHQuiet()
   copyFileToSSHQuiet "${sshUser}" "${sshHost}" "${filePath}" "${remoteFileName}"
 
   # shellcheck disable=SC2029
-  ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
+  if [[ "${environment}" != "no" ]]; then
+    ssh "${sshUser}@${sshHost}" PROJECT_ENV="${environment}" "${remoteFileName}" "${parsedParameters[@]}"
+  else
+    ssh "${sshUser}@${sshHost}" "${remoteFileName}" "${parsedParameters[@]}"
+  fi
 
   removeFileFromSSHQuiet "${sshUser}" "${sshHost}" "${remoteFileName}"
 
